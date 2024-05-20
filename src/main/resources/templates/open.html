@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <th:block th:insert="~{fragments/head}"></th:block>
+    <link rel="stylesheet" th:href="@{/styles/open.css}">
+</head>
+<body>
+<input id="csrf" type="hidden" th:name="${_csrf.headerName}" th:value="${_csrf.token}">
+
+<div class="app">
+    <div class="container">
+        <div class="header">
+            <h1>Please enter your&nbsp;passphrase</h1>
+            <th:block th:replace="~{components/button-back}"/>
+            <script>
+                function back() {
+                    window.location.href = "/";
+                }
+            </script>
+        </div>
+        <div class="input-group">
+            <label for="passphrase">Passphrase</label>
+            <textarea class="input" id="passphrase" type="text"></textarea>
+        </div>
+        <button id="confirm" class="button-next button-next--disabled">
+            <span class="loader"><span></span><span></span><span></span></span>
+            Confirm
+        </button>
+    </div>
+</div>
+
+<script defer>
+    const input = document.querySelector("#passphrase");
+    const btn = document.querySelector("#confirm");
+    input.addEventListener("input", () => {
+        if (input.value && input.value.trim().length > 0)
+            btn.classList.remove("button-next--disabled");
+        else btn.classList.add("button-next--disabled");
+    });
+    btn.addEventListener("click", () => {
+        if (btn.classList.contains("button-next--disabled")
+            || btn.classList.contains("btn--loading")) return;
+        btn.classList.add("btn--loading");
+
+        const csrf = document.querySelector("#csrf");
+        const headers = {
+            "Content-Type": "application/json"
+        };
+        headers[csrf.name] = csrf.value;
+
+        fetch("/open", {
+            method: "POST",
+            body: JSON.stringify({
+                mnemonic: input.value.trim()
+            }),
+            headers: headers
+        }).then(response => {
+            if (response.status >= 400) {
+                input.classList.add("error");
+                btn.classList.remove("btn--loading");
+            }
+            else window.location.href = "/lock";
+        })
+    });
+</script>
+</body>
+</html>

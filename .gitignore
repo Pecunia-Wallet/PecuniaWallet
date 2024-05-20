@@ -1,0 +1,48 @@
+### Secure ###
+application.yaml
+application.properties
+passwords/
+ssl/
+
+### Minified files ###
+*.min.css
+*.min.js
+
+### Gradle ###
+.gradle
+gradlew
+gradlew.bat
+gradle/
+!gradle/wrapper/gradle-wrapper.properties
+
+### Builds ###
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### VS Code ###
+.vscode/
+
+## Misc ###
+check-jar-sha1.sh

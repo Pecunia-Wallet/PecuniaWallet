@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Lock Pecunia</title>
+    <th:block th:insert="~{fragments/head}"></th:block>
+    <link rel="stylesheet" th:href="@{/styles/code-input.css}">
+    <link rel="stylesheet" th:href="@{/styles/lock.css}">
+</head>
+<body>
+<input type="hidden" id="token" th:value="${token}">
+
+<div class="app">
+    <th:block th:replace="~{components/promo-alert :: alert (closeable=true)}"/>
+
+    <div class="container">
+        <div class="code-input">
+            <div class="header">
+                <h1>Set a PIN</h1>
+                <h2>for quick access</h2>
+            </div>
+            <div class="code">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="keyboard">
+                <div class="keyboard__row">
+                    <button class="key"></button>
+                    <button class="key"></button>
+                    <button class="key"></button>
+                </div>
+                <div class="keyboard__row">
+                    <button class="key"></button>
+                    <button class="key"></button>
+                    <button class="key"></button>
+                </div>
+                <div class="keyboard__row">
+                    <button class="key"></button>
+                    <button class="key"></button>
+                    <button class="key"></button>
+                </div>
+                <div class="keyboard__row">
+                    <button class="key key--icon" id="exit">
+                        <svg class="icon-exit" width="800px" height="800px" viewBox="0 0 24 24" fill="none"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M15 12L2 12M2 12L5.5 9M2 12L5.5 15" stroke="#E84545FF" stroke-width="1.5"
+                                      stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M9.00195 7C9.01406 4.82497 9.11051 3.64706 9.87889 2.87868C10.7576 2 12.1718 2 15.0002 2L16.0002 2C18.8286 2 20.2429 2 21.1215 2.87868C22.0002 3.75736 22.0002 5.17157 22.0002 8L22.0002 16C22.0002 18.8284 22.0002 20.2426 21.1215 21.1213C20.3531 21.8897 19.1752 21.9862 17 21.9983M9.00195 17C9.01406 19.175 9.11051 20.3529 9.87889 21.1213C10.5202 21.7626 11.4467 21.9359 13 21.9827"
+                                      stroke="#E84545FF" stroke-width="1.5" stroke-linecap="round"/>
+                            </g>
+                        </svg>
+                    </button>
+                    <button class="key"></button>
+                    <button class="key key--icon" id="backspace">
+                        <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none"
+                             xmlns="http://www.w3.org/2000/svg"
+                             stroke="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"
+                               stroke="#CCCCCC"
+                               stroke-width="0.43200000000000005"/>
+                            <g id="SVGRepo_iconCarrier">
+                                <path d="M8 6H19C19.5523 6 20 6.44772 20 7V17C20 17.5523 19.5523 18 19 18H8L2 12L5 9M16 9L13.0001 11.9999M13.0001 11.9999L10 15M13.0001 11.9999L10.0002 9M13.0001 11.9999L16.0002 15"
+                                      stroke="#2B2E4AFF" stroke-width="1.5" stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{fragments/footer :: footer (theme='light')}"/>
+</div>
+
+<script async defer>
+    let nums = [];
+    for (let i = 0; i < 10; i++) {
+        nums.push(i);
+    }
+    let pin = "";
+    let loading;
+
+    const asterisks = document.querySelectorAll(".code>span");
+    const drawAsterisks = () => {
+        asterisks.forEach((asterisk, i) => {
+            if (pin.length >= i + 1)
+                asterisk.classList.add("active");
+            else asterisk.classList.remove("active");
+        });
+    };
+
+    const buttons = document.querySelectorAll(".keyboard>.keyboard__row>button.key:not(.key--icon)");
+    buttons.forEach(btn => {
+        const num = nums.splice(Math.round(Math.random() * (nums.length - 1)), 1);
+        btn.innerText = num.toString();
+        btn.addEventListener("click", () => {
+            if (loading) return;
+            if (pin.length < 6) {
+                pin += num;
+                if (pin.length === 6) setPin(pin);
+            }
+            drawAsterisks();
+        })
+    });
+    document.querySelectorAll(".keyboard>.keyboard__row>button.key").forEach(btn => {
+        btn.addEventListener("touchstart", () => {
+            if (loading) return;
+            btn.classList.add("touched");
+        })
+        btn.addEventListener("touchend", () => {
+            setTimeout(() =>
+                btn.classList.remove("touched"), 150)
+        })
+    });
+
+    const backspace = () => {
+        if (loading) return;
+        if (pin.length > 0)
+            pin = pin.substring(0, pin.length - 1);
+        drawAsterisks();
+    };
+
+    document.querySelector("button#backspace").addEventListener("click", backspace);
+    document.addEventListener("keydown", e => {
+        if (e.key === "Backspace" || e.key === "Delete") backspace();
+    });
+
+    document.querySelector("button#exit").addEventListener("click", () => {
+        window.location.href = "/logout";
+    });
+</script>
+<th:block th:replace="~{imports/cipher}"></th:block>
+<script defer>
+    function setLoading(l) {
+        loading = l;
+        if (l) {
+            asterisks.forEach((asterisk, i) =>
+                setTimeout(() => {
+                    if (loading) asterisk.classList.add("loading")
+                }, 50 * i))
+            document.querySelector(".keyboard").classList.add("keyboard--loading");
+            document.querySelector(".code").classList.add("code--loading");
+        } else {
+            asterisks.forEach(asterisk => {
+                asterisk.classList.remove("loading")
+            });
+            document.querySelector(".keyboard").classList.remove("keyboard--loading");
+            document.querySelector(".code").classList.remove("code--loading");
+        }
+    }
+
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            let date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/" + "; secure=true" + "; SameSite=lax";
+    }
+
+    function eraseCookie(name) {
+        document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    function setPin(pin) {
+        setLoading(true);
+        const cipherWorker = new Worker("/scripts/cipherWorker.js");
+        const device = new DeviceUUID().get().replaceAll("-", "");
+        cipherWorker.onmessage = e => {
+            try {
+                setCookie("wat", e.data, 14);
+                setTimeout(onTokenSaved, Math.max(0, 500 - (Date.now() - start)));
+            } catch {
+            }
+        }
+        const start = Date.now();
+        cipherWorker.postMessage({
+            mode: "encrypt",
+            src: document.querySelector("#token").value,
+            key: pin,
+            device: device
+        });
+    }
+</script>
+</body>
+</html>

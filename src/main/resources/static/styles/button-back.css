@@ -1,0 +1,21 @@
+.back {
+    background-color: rgba(96, 126, 170, 0.05);
+    opacity: .8;
+    border: none;
+    border-radius: 100%;
+    padding: 7px;
+    transition: background-color .1s ease-in-out,
+    opacity .1s ease-in-out;
+    cursor: pointer;
+}
+
+.back:hover {
+    background-color: rgba(96, 126, 170, 0.15);
+    opacity: 1;
+
+}
+
+.back .ico {
+    width: 22px;
+    height: 22px;
+}

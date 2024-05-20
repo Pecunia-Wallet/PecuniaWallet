@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <th:block th:insert="~{fragments/head}"></th:block>
+    <link rel="stylesheet" th:href="@{/styles/main.css}">
+</head>
+<body>
+<canvas id="background"></canvas>
+<div class="app">
+    <th:block th:if="${@conf.promo()}">
+        <th:block th:replace="~{components/promo-alert}"/>
+    </th:block>
+
+    <div class="menu">
+        <th:block th:replace="~{components/logo :: logo (type='full', theme='light')}"/>
+
+        <div th:if="${@conf.mode().name() == 'NORMAL'}" class="buttons">
+            <button class="btn btn--accent" onclick="window.location.href = '/open'">
+                Open existing wallet
+            </button>
+            <button class="btn" onclick="window.location.href = '/new'">
+                Create new wallet
+            </button>
+        </div>
+    </div>
+
+    <th:block th:if="${@conf.mode().name() == 'NORMAL'}">
+        <th:block th:replace="~{fragments/footer :: footer (theme='dark')}"/>
+    </th:block>
+</div>
+<script defer th:src="@{/scripts/stars.js}"></script>
+</body>
+</html>

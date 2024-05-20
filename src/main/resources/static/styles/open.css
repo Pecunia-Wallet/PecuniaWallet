@@ -1,0 +1,171 @@
+.app {
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    min-height: unset;
+    padding: 10px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 500px;
+    max-height: 360px;
+    width: 100%;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 500;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+label[for="passphrase"] {
+    font-size: 18px;
+    color: rgba(96, 126, 170, .6);
+}
+
+.input-group:has(.input.error) label {
+    color: rgba(232, 69, 69, 0.5);
+}
+
+.input {
+    resize: none;
+    min-width: 100%;
+    min-height: 140px;
+    border-radius: 10px;
+    border: none;
+    padding: 20px;
+    box-shadow: 0 0 7px -3px var(--blue);
+    font-size: 24px;
+    text-align: justify;
+    overflow-x: hidden;
+    line-height: 1.3;
+}
+
+.input.error {
+    border: 1px solid rgba(232, 69, 69, 0.5);
+    animation: horizontal-shaking 2 .3s;
+    box-shadow: 0 0 7px -3px rgb(232, 69, 69);
+}
+
+@keyframes horizontal-shaking {
+    0% {
+        transform: translateX(0)
+    }
+    25% {
+        transform: translateX(2px)
+    }
+    50% {
+        transform: translateX(-2px)
+    }
+    75% {
+        transform: translateX(2px)
+    }
+    100% {
+        transform: translateX(0)
+    }
+}
+
+.button-next {
+    width: 100%;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 10px 20px;
+    border: none;
+    background: var(--blue-darker);
+    color: var(--milky);
+    font-weight: 500;
+    font-size: 16px ;
+    text-transform: capitalize;
+    transition: opacity .15s ease-in-out;
+    user-select: none;
+    position: relative;
+    text-align: center;
+}
+
+.button-next--disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+.button-next:not(.button-next--disabled, .btn--loading):hover, .button-next:not(.button-next--disabled, .btn--loading):active {
+    opacity: .97;
+}
+
+.btn--loading {
+    color: transparent;
+    cursor: progress;
+}
+
+.btn--loading .loader {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3em;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    margin: 0 auto;
+    top: 0;
+    left: 0;
+}
+
+.btn--loading .loader span {
+    display: inline-block;
+    width: .4em;
+    height: .4em;
+    border-radius: 100%;
+    background-color: var(--milky);
+}
+
+.btn--loading .loader span:nth-child(1) {
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.btn--loading .loader span:nth-child(2) {
+    animation: bounce 1s ease-in-out 0.33s infinite;
+}
+
+.btn--loading .loader span:nth-child(3) {
+    animation: bounce 1s ease-in-out 0.66s infinite;
+}
+
+@keyframes bounce {
+    0%, 75%, 100% {
+        transform: translateY(0);
+    }
+
+    25% {
+        transform: translateY(-100%);
+    }
+}
+
+@media (max-width: 525px) {
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .input {
+        font-size: 18px;
+        line-height: 1.6;
+    }
+}

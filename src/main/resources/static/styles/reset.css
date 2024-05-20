@@ -1,0 +1,32 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+    color: #352957;
+}
+
+html, body, .app {
+    min-height: 100dvh;
+}
+
+.app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.content {
+    flex: 1 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--blue-darker);
+}
+
+a {
+    color: var(--blue);
+}
