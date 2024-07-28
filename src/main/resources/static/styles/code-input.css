@@ -1,0 +1,170 @@
+.code-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    gap: 60px;
+}
+
+.header {
+    width: 60%;
+}
+
+.header h1 {
+    text-align: left;
+    font-size: 32px;
+}
+
+.header h2 {
+    text-align: right;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.keyboard--loading {
+    cursor: wait;
+}
+
+.keyboard--loading .key:not(#exit) {
+    pointer-events: none;
+}
+
+.keyboard__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.key {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+    font-size: 28px;
+    background: rgba(96, 126, 170, 0.05);
+    border: none;
+    cursor: pointer;
+    transition: background .07s ease-in-out;
+}
+
+.key:hover {
+    background: rgba(96, 126, 170, 0.1);
+}
+
+.key:active {
+    transition: background 0s;
+    background: rgba(96, 126, 170, 0.13);
+}
+
+.key--hidden {
+    visibility: hidden;
+}
+
+.key--icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.icon-exit {
+    height: 37px !important;
+}
+
+.code {
+    display: flex;
+}
+
+.code--loading {
+    cursor: wait;
+}
+
+.code span {
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    background: linear-gradient(30deg, rgba(96, 126, 170, 0.15), rgba(128, 128, 128, 0.1), #fff);
+    box-shadow: inset 5px 5px 3px 3px rgba(96, 126, 170, 0.03);
+    transition: background 1s ease-in-out;
+    margin: 0 11px;
+    transform-origin: center center;
+}
+
+.code span.active {
+    background: linear-gradient(30deg, rgba(28, 56, 121, 0.7) 5%, rgba(28, 56, 121), #2B2E4AFF 90%);
+    box-shadow: inset -1px 1px 2px 0 #607EAA;
+}
+
+.code:not(.code--loading) span.active {
+    animation: .2s scale ease-in-out reverse;
+}
+
+.code span.loading {
+    animation: infinite .7s blink alternate-reverse!important;
+}
+
+@keyframes scale {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.25);
+    }
+}
+
+@keyframes blink {
+    from {
+        opacity: 0.2;
+    }
+    70% {
+        opacity: 1;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 425px) {
+    .key {
+        width: 80px;
+        height: 80px;
+    }
+
+    .code span {
+        width: 25px;
+        height: 25px;
+        margin: 10px;
+    }
+
+    .code span.active {
+        animation: .3s scale ease-in-out reverse;
+    }
+
+    @keyframes scale {
+        from {
+            transform: scale(1);
+        }
+        to {
+            transform: scale(1.5);
+        }
+    }
+}
+
+@media (pointer: none), (pointer: coarse) {
+    .key:hover, .key:active {
+        background: rgba(96, 126, 170, 0.05);
+    }
+
+    .key.touched {
+        background: rgba(96, 126, 170, 0.1);
+    }
+}

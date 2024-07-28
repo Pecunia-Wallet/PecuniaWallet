@@ -1,0 +1,41 @@
+<app-loader [show]="loading"/>
+
+<app-wallet-header title="Compose request" link="/wallet/coin/receive"
+                   [params]="{ addr: null, label: null, message: null, amount: null, restore: null }" />
+
+<div class="form">
+    <div class="inputs" [formGroup]="form">
+        <div class="input-group">
+            <h3 class="input-group__title">Amount*</h3>
+            <div class="input-row" *ngIf="coin">
+                <app-input [placeholder]="coinPlaceholder" type="number" class="app-input"
+                           [min]="0" [step]="1 / Math.pow(10, coin.decimals || 0)"
+                           formControlName="amountCoins" />
+                <span class="currency">{{ coin.shortName.toUpperCase() }}</span>
+            </div>
+            <div class="input-row" *ngIf="currency">
+                <app-input [placeholder]="currencyPlaceholder" type="number" class="app-input"
+                           [min]="0" [step]="1 / Math.pow(10, currency.decimals || 0)"
+                           formControlName="amountFiat"/>
+                <span class="currency">{{ currency.shortName.toUpperCase() }}</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <h3 class="input-group__title">Label</h3>
+            <input type="text" class="input" placeholder="John Doe" formControlName="label">
+        </div>
+        <div class="input-group">
+            <h3 class="input-group__title">Message</h3>
+            <div class="textarea-placeholder">
+                <textarea type="text" class="input" formControlName="message"></textarea>
+            </div>
+            <span class="hint">* – required fields</span>
+        </div>
+    </div>
+    <button class="button"
+            [class.inactive]="!valid"
+            (click)="compose()">
+        Get request
+        <fa-icon class="icon" [icon]="faArrowRight"/>
+    </button>
+</div>

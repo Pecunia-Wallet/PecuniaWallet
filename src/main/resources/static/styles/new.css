@@ -1,0 +1,528 @@
+.header {
+    box-shadow: 5px 0 10px 0 rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    z-index: 1;
+}
+
+.content, .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1024px;
+    width: 100%;
+    margin: auto;
+}
+
+.content {
+    justify-content: flex-start;
+    flex-direction: column;
+    padding: 40px 15px;
+}
+
+.stepper {
+    width: 100%;
+    max-width: 700px;
+    padding: 0 5px 30px;
+}
+
+@media (max-width: 425px) {
+    .stepper {
+        padding: 0 15px 30px;
+    }
+}
+
+.stepper__steps {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 700px;
+}
+
+.stepper__progress {
+    position: absolute;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.stepper__progress .before, .stepper__progress .after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 100%;
+    height: 1px;
+    z-index: -1;
+}
+
+.stepper__progress .before {
+    background: var(--blue);
+    opacity: .2;
+}
+
+.stepper__progress .after {
+    background: blue;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(-210deg, #042a71 40%, #11e5a5);
+    width: 0;
+    transition: width .7s ease-in-out;
+}
+
+.stepper__step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(-210deg, #042a71, #11e5a5);
+    border-radius: 100%;
+}
+
+.stepper__step::before {
+    content: "";
+    position: absolute;
+    margin: auto;
+    z-index: -1;
+    width: 150%;
+    height: 100%;
+    background: white;
+}
+
+.stepper__step::after {
+    position: absolute;
+    bottom: -22px;
+    content: var(--label);
+    font-weight: 500;
+}
+
+.stepper__step svg {
+    width: 60%;
+    height: 60%;
+}
+
+.stepper__step--disabled {
+    background: rgba(128, 128, 128, 0.65);
+}
+
+.stepper__step--disabled::after {
+    opacity: .5;
+    font-weight: 400;
+}
+
+.frame-slider-container {
+    overflow: hidden;
+    max-width: 700px;
+    width: 100%;
+}
+
+.frame-slider {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    transition: transform .5s ease-in-out;
+    --min: min(700px, calc(100vw - 30px));
+    transform: translateX(calc(-1 * var(--frame) * var(--min)));
+}
+
+.frame {
+    min-width: min(700px, calc(100vw - 30px));
+    margin: 40px 0;
+    height: 100%;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.text h1, .text h2, .text h3 {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 325px) {
+    .text h2 {
+        font-size: 23px;
+    }
+}
+
+.text p {
+    font-size: 18px;
+    text-align: justify;
+}
+
+.text .bold {
+    font-weight: 500;
+}
+
+.disclaimer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 50px;
+    height: 100%;
+}
+
+.button-next {
+    display: flex;
+    min-width: 135px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 10px 20px;
+    border: none;
+    background: var(--blue-darker);
+    color: var(--milky);
+    font-weight: 500;
+    font-size: 16px ;
+    text-transform: capitalize;
+    transition: opacity .15s ease-in-out;
+    user-select: none;
+    position: relative;
+}
+
+.button-next--disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+@media (max-width: 425px) {
+    .button-next {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.button-next:not(.button-next--disabled):not(.btn--loading):hover, .button-next:not(.button-next--disabled):not(.btn--loading):active {
+    opacity: .97;
+}
+
+.button-next .img, .button-next svg {
+    width: 25px;
+    height: 25px;
+}
+
+.button-next .arrow-icon {
+    transition: transform 0.3s ease;
+}
+
+.button-next .arrow-icon--circle {
+    transition: stroke-dashoffset 0.3s ease;
+    stroke-dasharray: 95;
+    stroke-dashoffset: 95;
+}
+
+.button-next:not(.button-next--disabled):hover .arrow-icon {
+    transform: translate3d(5px, 0, 0);
+}
+
+.button-next:not(.button-next--disabled):hover .arrow-icon--circle {
+    stroke-dashoffset: 0;
+}
+
+.btn--loading {
+    color: transparent;
+    cursor: progress;
+}
+
+.btn--loading .loader {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3em;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    margin: 0 auto;
+}
+
+.btn--loading .loader span {
+    display: inline-block;
+    width: .4em;
+    height: .4em;
+    border-radius: 100%;
+    background-color: var(--milky);
+}
+
+.btn--loading .loader span:nth-child(1) {
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.btn--loading .loader span:nth-child(2) {
+    animation: bounce 1s ease-in-out 0.33s infinite;
+}
+
+.btn--loading .loader span:nth-child(3) {
+    animation: bounce 1s ease-in-out 0.66s infinite;
+}
+
+@keyframes bounce {
+    0%, 75%, 100% {
+        transform: translateY(0);
+    }
+
+    25% {
+        transform: translateY(-100%);
+    }
+}
+
+.checkbox-group {
+    display: flex;
+    gap: 10px;
+}
+
+.checkbox-group label {
+    text-align: justify;
+}
+
+.checkbox-wrapper .checkbox {
+    --bg: #fff;
+    --brdr: #d1d6ee;
+    --brdr-actv: var(--blue-darker);
+    --brdr-hovr: rgba(96, 126, 170, 0.3);
+    --size: 1;
+    --dur: calc((var(--size, 2)/2) * 0.6s);
+    display: inline-block;
+    width: calc(var(--size, 1) * 22px);
+    position: relative;
+}
+
+.checkbox-wrapper .checkbox:after {
+    content: "";
+    width: 100%;
+    padding-top: 100%;
+    display: block;
+}
+
+.checkbox-wrapper .checkbox > * {
+    position: absolute;
+}
+
+.checkbox-wrapper .checkbox input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    background-color: var(--bg);
+    border-radius: calc(var(--size, 1) * 4px);
+    border: calc(var(--newBrdr, var(--size, 1)) * 1px) solid;
+    color: var(--newBrdrClr, var(--brdr));
+    outline: none;
+    margin: 0;
+    padding: 0;
+    transition: all calc(var(--dur) / 3) linear;
+}
+
+.checkbox-wrapper .checkbox input:hover,
+.checkbox-wrapper .checkbox input:checked {
+    --newBrdr: calc(var(--size, 1) * 2);
+}
+
+.checkbox-wrapper .checkbox input:hover {
+    --newBrdrClr: var(--brdr-hovr);
+}
+
+.checkbox-wrapper .checkbox input:checked {
+    --newBrdrClr: var(--brdr-actv);
+    transition-delay: calc(var(--dur) /1.3);
+}
+
+.checkbox-wrapper .checkbox input:checked + svg {
+    --dashArray: 16 93;
+    --dashOffset: 109;
+}
+
+.checkbox-wrapper .checkbox svg {
+    fill: none;
+    left: 0;
+    pointer-events: none;
+    stroke: var(--blue-darker);
+    stroke-dasharray: var(--dashArray, 93);
+    stroke-dashoffset: var(--dashOffset, 94);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2px;
+    top: 0;
+    transition: stroke-dasharray var(--dur), stroke-dashoffset var(--dur);
+}
+
+.checkbox-wrapper .checkbox svg,
+.checkbox-wrapper .checkbox input {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.generate {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 30px;
+    width: fit-content;
+    margin: auto;
+}
+
+.passphrase {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 20px;
+}
+
+.passphrase span {
+    font-size: 18px;
+    max-width: 500px;
+    background: rgba(96, 126, 170, 0.15);
+    padding: 15px 20px;
+    border-radius: 10px;
+    line-height: 1.4;
+    word-spacing: 7px;
+    cursor: text;
+    text-align: justify;
+}
+
+.passphrase button {
+    font-size: 16px;
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.warning {
+    display: flex;
+    gap: 8px;
+    font-weight: 300;
+    color: var(--red-light);
+    max-width: 450px;
+    text-align: justify;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.warning svg {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+}
+
+.checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.frame:has(.confirm) {
+    display: flex;
+    justify-content: center;
+}
+
+.confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.confirm h2 {
+    font-size: 22px;
+    font-weight: 500;
+    max-width: 380px;
+    text-align: justify;
+}
+
+.confirm .inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.confirm .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+}
+
+.confirm .input-group input {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    border-radius: 7px;
+    border: 1px solid rgba(96, 126, 170, 0.35);
+    box-shadow: 0 0 3px rgba(73, 94, 128, 0.2);
+    font-size: 17px;
+}
+
+.confirm .input-group input.error {
+    border: 1px solid rgba(232, 69, 69, 0.5);
+    animation: horizontal-shaking 2 .3s;
+    box-shadow: 0 0 3px rgba(232, 69, 69, 0.2);
+}
+
+@keyframes horizontal-shaking {
+    0% {
+        transform: translateX(0)
+    }
+    25% {
+        transform: translateX(2px)
+    }
+    50% {
+        transform: translateX(-2px)
+    }
+    75% {
+        transform: translateX(2px)
+    }
+    100% {
+        transform: translateX(0)
+    }
+}
+
+.confirm .input-group label {
+    opacity: .6;
+    cursor: pointer;
+}
+
+@media (max-width: 425px) {
+    .inputs, .input-group {
+        width: 100%;
+    }
+}
+
+.confirm .button-next {
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.error-notify {
+    border-radius: 5px;
+    padding: 10px;
+    color: var(--red-light);
+    border: 1px solid var(--red-light);
+    background: rgba(232, 69, 69, 0.07);
+    max-width: 380px;
+    text-align: justify;
+    margin: -15px 0 15px;
+}
+
+.error-notify a {
+    color: var(--red-dark)
+}
+
+.hidden {
+    display: none;
+}

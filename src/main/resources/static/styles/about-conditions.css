@@ -1,0 +1,13 @@
+.layout__description {
+    position: relative;
+}
+
+.layout__icon {
+    width: 30px;
+    position: absolute;
+    top: -70px;
+}
+
+.layout__cards {
+    grid-template-columns:repeat(auto-fill, minmax(450px, 1fr));
+}

@@ -1,0 +1,1 @@
+import{ca as n}from"./chunk-UOUGGPYB.js";var o=(()=>{let t=class t{constructor(){this._saved=new Map}getSavedInstance(e){return this._saved.get(e)||null}saveInstance(e,s){this._saved.set(e,s)}};t.\u0275fac=function(s){return new(s||t)},t.\u0275prov=n({token:t,factory:t.\u0275fac,providedIn:"root"});let a=t;return a})();export{o as a};

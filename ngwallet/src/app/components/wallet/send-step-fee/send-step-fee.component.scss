@@ -1,0 +1,114 @@
+@use "variables" as *;
+@use "../layout";
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 370px;
+    width: 100%;
+    padding-top: 50px;
+    gap: 30px;
+}
+
+.sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: .05em;
+    }
+}
+
+.input-group {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+
+    span {
+        letter-spacing: .05em;
+    }
+}
+
+.dropdown {
+    font-size: 16px;
+}
+
+.confirm-button {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+::ng-deep {
+    .ngx-slider .ngx-slider-bar {
+        background: #f8f8f9 !important;
+        height: 5px !important;
+        border-radius: 5px;
+    }
+
+    .ngx-slider .ngx-slider-selection {
+        background: $blue-darker !important;
+    }
+
+    .ngx-slider .ngx-slider-bubble, .ngx-slider-span {
+        color: fade-out($blue-darker, .6) !important;
+        font-size: 14px !important;
+        font-weight: lighter !important;
+        letter-spacing: .05em !important;
+    }
+
+    .ngx-slider-pointer {
+        width: 5px !important;
+        height: 15px !important;
+        background-color: $blue-darker !important;
+        top: auto !important;
+        bottom: -5px !important;
+
+        &::after {
+            display: none !important;
+        }
+    }
+
+    .ngx-slider .ngx-slider-tick {
+        width: 1px !important;
+        height: 10px !important;
+        margin-left: 4px !important;
+        border-radius: 0 !important;
+        background: rgba($blue-darker, .2) !important;
+    }
+
+    .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+        background: #fff !important;
+    }
+}
+
+@media (max-width: 425px) {
+    .sliders {
+        padding: 0 10px;
+    }
+}

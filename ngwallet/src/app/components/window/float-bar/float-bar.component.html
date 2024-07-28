@@ -1,0 +1,18 @@
+<div class="container" (panup)="toggleTo(true)"
+                       (pandown)="toggleTo(false)">
+
+    <div class="links" [style.padding-bottom]="float ?'': '20px'">
+        <ng-container *ngFor="let link of links; index as i">
+            <div class="link" [routerLink]="link.uri" queryParamsHandling="preserve"
+                              [class.link--active]="router.url.startsWith(link.uri)">
+                <fa-icon *ngIf="link.image" [icon]="link.image" class="link__image"/>
+                <span class="link__text">{{ link.text }}</span>
+            </div>
+            <span *ngIf="i+1 < links.length" class="divider"></span>
+        </ng-container>
+    </div>
+
+    <div class="handle-wrapper" *ngIf="float" (tap)="toggle()">
+        <span class="handle"></span>
+    </div>
+</div>

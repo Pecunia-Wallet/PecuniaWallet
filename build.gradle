@@ -1,0 +1,205 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
+plugins {
+    id "java"
+    id "org.springframework.boot" version "3.2.3"
+    id "io.spring.dependency-management" version "1.1.4"
+    id "com.github.node-gradle.node" version "7.0.2"
+}
+
+group = "com.pecuniawallet"
+version = ""
+
+java {
+    sourceCompatibility = "21"
+}
+
+jar.archiveBaseName = "pecunia"
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+files "src/main/resources"
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs("/src/main/resources/static/build", "/src/main/resources/templates")
+        }
+    }
+}
+
+configurations {
+    configureEach {
+        exclude group: "org.slf4j", module: "slf4j-jdk14"
+        exclude group: "org.slf4j", module: "util-8"
+    }
+}
+
+
+dependencies {
+    // Spring
+    implementation "org.springframework.boot:spring-boot-starter-web:3.3.1"
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.3.1'
+    implementation "org.springframework.boot:spring-boot-starter-cache:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-mail:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-security:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-logging:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-webflux:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-websocket:3.3.1"
+
+    implementation "io.projectreactor:reactor-core:3.6.0"
+    developmentOnly "org.springframework.boot:spring-boot-devtools:3.3.1"
+
+    // Testing
+    testImplementation "org.springframework.boot:spring-boot-starter-test:3.3.1"
+    testImplementation "org.junit.vintage:junit-vintage-engine:5.10.2"
+
+    // DB
+    implementation "org.springframework.boot:spring-boot-starter-data-jdbc:3.3.1"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:3.3.1"
+    runtimeOnly "org.postgresql:postgresql:42.7.3"
+
+    // Firebase
+    implementation "com.google.firebase:firebase-admin:9.3.0"
+
+    // Thymeleaf
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf:3.2.4"
+    implementation "org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE"
+
+    // Bucket4j
+    implementation "com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0"
+
+    // Google
+    implementation "com.google.code.gson:gson:2.10.1"
+
+    // Apache Commons
+    implementation "org.apache.commons:commons-lang3:3.14.0"
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+
+    // JetBrains
+    implementation "org.jetbrains:annotations:24.1.0"
+
+    // Bitcoinj
+    implementation "org.bitcoinj:bitcoinj-core:0.17-alpha4"
+    implementation "org.bitcoinj:bitcoinj-tools:0.14.7"
+
+    // Litecoinj (con
+    implementation files("libs/litecoinj-0.17.jar")
+
+    // Bitcoin Rpc
+    implementation "wf.bitcoin:bitcoin-rpc-client:1.1.0"
+
+    // libdohj
+//    implementation "com.github.dogecoin:libdohj:v0.15.9"
+
+    // Misc
+//    implementation "com.fasterxml.uuid:java-uuid-generator:5.0.0"
+
+    // Overrides
+    implementation "jakarta.mail:jakarta.mail-api:2.1.3"
+    implementation "jakarta.activation:jakarta.activation-api:2.1.3"
+}
+
+tasks.withType(JavaCompile).each {
+    it.options.compilerArgs.add("--enable-preview")
+}
+
+tasks.withType(Test).each {
+    it.jvmArgs("--enable-preview")
+}
+
+tasks.register("minifyCss", NpmTask) {
+    args = ["run", "minifyCss"];
+}
+
+tasks.register("minifyJs", NpmTask) {
+    args = ["run", "minifyJs"];
+}
+
+build.configure {
+    finalizedBy minifyCss
+    finalizedBy minifyJs
+}
+
+// Quick tasks
+static def toUnix(String path) {
+    return "/mnt/${path.replaceFirst(":", "")}".replaceAll("\\\\", "/").toLowerCase()
+}
+
+project.ext.resourcesDir = sourceSets.main.resources.srcDirs.first().toString()
+project.ext.resourcesDirUnix = toUnix(resourcesDir)
+project.ext.jbuildDir = jar.archiveFile.get().asFile.parent
+project.ext.buildDirUnix = toUnix(project.jbuildDir)
+project.ext.passFile = "${project.resourcesDir}/passwords/root" as GStringImpl
+project.ext.passFileUnix = "${project.resourcesDirUnix}/passwords/root" as GStringImpl
+
+def isJarActual() {
+    printf "\033[1mChecking jar files hashes:\033[0m\n"
+    def hashCheck = exec {
+        ignoreExitValue true
+        commandLine "bash", "-c", "./check-jar-sha1.sh -build ${project.buildDirUnix} -pass ${project.passFileUnix}"
+    }
+    return hashCheck.exitValue === 0
+}
+
+tasks.register("deploy") {
+    doLast {
+        def testMode = project.hasProperty("testMode")
+        if (!testMode && isJarActual()) return
+
+        println "Deploying to remote${testMode ? ' (test-mode)' : ''}..."
+        def res = exec {
+            ignoreExitValue true
+            commandLine "bash", "-c", "sshpass -f ${project.passFileUnix} " +
+                    "scp ${project.buildDirUnix}/pecunia.jar " +
+                    "root@pecuniawallet.com:/root/app/bin/" +
+                    "${testMode ? 'pecunia-test' : 'tmp-pecunia'}.jar"
+        }
+        if (res.exitValue !== 0) {
+            println res
+            throw new RuntimeException("Deploy failed.")
+        }
+    }
+}
+
+tasks.register("killRemote") {
+    doLast {
+        exec {
+            ignoreExitValue true
+            commandLine "bash", "-c", "sshpass -f ${project.passFileUnix} ssh root@pecuniawallet.com 'pkill -f pecunia; fuser 443/tcp -k; fuser 80/tcp -k'"
+        }
+    }
+}
+
+tasks.register("restartRemote") {
+    doLast {
+        exec {
+            commandLine "bash", "-c", "sshpass -f ${project.passFileUnix} ssh root@pecuniawallet.com sudo service pecunia restart"
+        }
+    }
+}
+
+tasks.register("buildFrontend") {
+    doLast {
+        delete "src/main/resources/static/build"
+        exec {
+            commandLine "cmd", "/c", "cd ngwallet && ng build --configuration production"
+        }
+        copy {
+            from("ngwallet/dist/browser")
+            into("src/main/resources/static/build")
+        }
+    }
+}

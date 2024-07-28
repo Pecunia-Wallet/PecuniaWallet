@@ -1,0 +1,1 @@
+import{Pb as r,Xb as f,ma as o,wb as i,xb as a}from"./chunk-UOUGGPYB.js";var m=(()=>{let e=class e{};e.\u0275fac=function(n){return new(n||e)},e.\u0275cmp=o({type:e,selectors:[["app-office"]],standalone:!0,features:[f],decls:2,vars:0,template:function(n,c){n&1&&(i(0,"p"),r(1,"office works!"),a())}});let t=e;return t})();export{m as OfficeComponent};

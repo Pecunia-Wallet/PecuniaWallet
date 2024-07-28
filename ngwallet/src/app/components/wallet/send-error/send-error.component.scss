@@ -1,0 +1,55 @@
+@use "variables" as *;
+@use "../layout";
+
+.content {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+    max-width: 400px;
+    gap: 25px;
+}
+
+.head {
+    font-size: 24px;
+    font-weight: normal;
+    letter-spacing: .05em;
+    text-align: left;
+    width: 100%;
+}
+
+.message {
+    display: flex;
+    gap: 20px;
+    font-size: 20px;
+    letter-spacing: .05em;
+    align-items: center;
+    text-align: justify;
+
+    fa-icon {
+        font-size: 35px;
+    }
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    &__name {
+        font-size: 20px;
+        font-weight: lighter;
+        letter-spacing: .05em;
+    }
+
+    button {
+        display: flex;
+        justify-content: center;
+        min-width: 270px;
+    }
+}

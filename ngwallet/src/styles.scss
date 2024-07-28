@@ -1,0 +1,31 @@
+@use "variables" as *;
+@use "reset";
+@use "lib";
+
+:root {
+    font-family: "Ubuntu", sans-serif;
+    color: $blue-darker;
+}
+
+@mixin shine {
+    display: inline-block;
+    position: relative;
+    $mainColor: #f6f7f8;
+    $shineColor: #edeef1;
+    background: $mainColor linear-gradient(to right, $mainColor 0%, $shineColor 20%, $mainColor 40%, $mainColor 100%) no-repeat;
+    background-size: 200% 104px;
+    animation: placeholderShimmer 1500ms linear forwards infinite;
+}
+
+.shine {
+    @include shine;
+}
+
+@keyframes placeholderShimmer {
+    from {
+        background-position: 150% 0;
+    }
+    to {
+        background-position: -150% 0;
+    }
+}

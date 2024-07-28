@@ -1,0 +1,40 @@
+.logo-container {
+    cursor: pointer;
+    width: fit-content;
+}
+
+.logo {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+}
+
+.logo > h1 {
+    font-size: 38px;
+}
+
+.logo > img {
+    width: 50px;
+    height: 50px;
+}
+
+.logo--light h1 {
+    color: var(--milky);
+}
+
+.logo--dark h1 {
+    color: var(--blue-darker);
+}
+
+@media (max-width: 425px) {
+    .logo > h1 {
+        font-size: 28px;
+    }
+
+    .logo > img {
+        width: 40px;
+        height: 40px;
+    }
+}

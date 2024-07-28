@@ -1,0 +1,14 @@
+button.scrollback {
+    opacity: 0;
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    width: 55px;
+    height: 55px;
+    border: 1px solid var(--blue-darker);
+    border-radius: 100%;
+    padding: 7px;
+    cursor: pointer;
+    background: rgb(255, 255, 255);
+    transition: opacity .15s ease-in-out;
+}

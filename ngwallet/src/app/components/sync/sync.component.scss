@@ -1,0 +1,155 @@
+@use "variables" as *;
+
+:host {
+    --spinnerSize: 110px;
+}
+
+.spinner {
+    @function percents($num) {
+        @return max(1px, calc(var(--spinnerSize) * $num / 100));
+    }
+
+    $shadow: 0 0 percents(10) calc(-1 * percents(7)) fade-out($blue-darker, .5);
+    $borderSize: percents(12);
+    $color: #53566c;
+    $background: fade-out($blue-darker, .97);
+
+    position: relative;
+    border: $borderSize solid;
+    border-color: $color transparent;
+    animation: rotation 2.5s linear reverse infinite;
+
+    &, &-wrapper, &__hole {
+        border-radius: 100%;
+    }
+
+    &, &-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &, &__hole {
+        width: 100%;
+        height: 100%;
+    }
+
+    &-wrapper {
+        width: var(--spinnerSize);
+        height: var(--spinnerSize);
+        min-width: var(--spinnerSize);
+        min-height: var(--spinnerSize);
+        background: $background;
+        box-shadow: inset $shadow;
+    }
+
+    &__hole {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #fff;
+        box-shadow: $shadow;
+
+        fa-icon {
+            color: $color;
+            opacity: .85;
+            font-size: percents(20);
+            animation: rotation 1.5s linear infinite;
+        }
+
+        $holeRadius: calc((var(--spinnerSize) - $borderSize * 2) / 2);
+        $offsetX: calc(50% - $borderSize / 2);
+        $offsetY: calc(-1 * $borderSize);
+
+        transform: rotate(45deg);
+
+        &::before, &::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: $borderSize;
+            height: $borderSize;
+            top: $offsetY;
+            left: $offsetX;
+            background: $color;
+            border-radius: 50%;
+            box-shadow: 0 calc($holeRadius * 2 + $borderSize) $color;
+        }
+
+        &::after {
+            left: $offsetY;
+            top: $offsetX;
+            box-shadow: calc($holeRadius * 2 + $borderSize) 0 $color;
+        }
+    }
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
+}
+
+app-footer {
+}
+
+.container {
+    flex: 1 0;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        p {
+            text-align: justify;
+            font-weight: lighter;
+            font-size: 18px;
+            max-width: 500px;
+
+            strong {
+                font-weight: 400;
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    :host {
+        --spinnerSize: 200px;
+        padding: 20px;
+    }
+
+    .container {
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 100%;
+    }
+
+    .spinner-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 50%;
+    }
+
+    .title {
+        text-align: center;
+        font-size: 36px;
+    }
+}

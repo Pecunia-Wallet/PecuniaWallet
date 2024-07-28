@@ -1,0 +1,33 @@
+<!--/*@thymesVar id="uri" type="java.net.URI"*/-->
+<!DOCTYPE html>
+<html lang="en" th:with="page=${uri.toString().replaceAll('.*/', '')}">
+<head>
+    <title th:text="${'About - ' + #strings.capitalize(page)}"></title>
+    <th:block th:insert="~{fragments/head}"></th:block>
+    <link rel="stylesheet" th:href="@{/styles/about.css}">
+    <link rel="stylesheet" th:href="@{'/styles/about-' + ${page} + '.css'}">
+</head>
+<body>
+<div class="app">
+    <header class="header">
+        <div class="container">
+            <div class="logo-container" onclick="window.location.href = '/'">
+                <th:block th:replace="~{components/logo :: logo (style='solid', type='full', theme='dark')}"/>
+            </div>
+            <th:block th:replace="~{components/button-back}"/>
+            <script>
+                function back() {
+                    history.back();
+                }
+            </script>
+        </div>
+    </header>
+    <main class="content" th:include="~{'fragments/about/' + ${page}}"
+          th:style="${page.equals('support') ? 'display:block;margin-top:20px;background:#fff;':''}">
+    </main>
+    <th:block th:replace="~{fragments/footer :: footer (theme='light')}"/>
+
+    <th:block th:replace="~{components/button-scrollback}" />
+</div>
+</body>
+</html>

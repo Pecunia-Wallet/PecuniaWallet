@@ -1,0 +1,4 @@
+@use "../layout" with (
+    $header: ":host",
+    $main: none
+);

@@ -1,0 +1,22 @@
+<th:block th:fragment="footer" th:with="theme=${theme ?: 'light'}">
+    <link rel="stylesheet" th:href="@{/styles/global.css}">
+    <link rel="stylesheet" th:href="@{/styles/footer.css}">
+    <div class="footer-container">
+        <footer th:class="${'footer footer--' + theme}">
+            <a th:if="${@conf.promo}" class="footer__link footer__link--accent red" href="/about/promo">Terms of
+                promo</a>
+            <nav class="footer__nav">
+                <div class="footer__row">
+                    <a class="footer__link" href="/about/features">Features</a>
+                    <a class="footer__link" href="/about/security">Security</a>
+                    <a class="footer__link" href="/about/conditions">Conditions</a>
+                </div>
+                <div class="footer__row">
+                    <a class="footer__link" href="/about/privacy">Privacy</a>
+                    <a class="footer__link" href="/about/legal">Legal</a>
+                    <a class="footer__link" href="/about/support#menu">Support</a>
+                </div>
+            </nav>
+        </footer>
+    </div>
+</th:block>

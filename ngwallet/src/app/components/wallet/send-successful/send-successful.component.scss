@@ -1,0 +1,44 @@
+@use "variables" as *;
+@use "../layout";
+
+.content {
+    margin-top: 50px;
+    max-width: 400px;
+}
+
+.message {
+    display: flex;
+    gap: 20px;
+    font-size: 20px;
+    letter-spacing: .05em;
+    align-items: center;
+
+    fa-icon {
+        font-size: 35px;
+    }
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+    gap: 40px;
+}
+
+.option {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    &__name {
+        font-size: 20px;
+        font-weight: lighter;
+        letter-spacing: .05em;
+    }
+
+    button {
+        display: flex;
+        justify-content: center;
+        min-width: 270px;
+    }
+}

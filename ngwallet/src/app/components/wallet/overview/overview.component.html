@@ -1,0 +1,26 @@
+<div class="chart">
+    <canvas baseChart type="doughnut" [data]="chartData" [options]="chartSettings"></canvas>
+    <div class="statistics-container">
+        <div class="statistics" *ngIf="!loading && valueChange != undefined">
+            <div class="change" *ngVar="(Math.abs(valueChange || 0) | percent: '.0-1') == '0%' as neutral"
+                 [class.change--neutral]="neutral"
+                 [class.change--positive]="!neutral && valueChange > 0"
+                 [class.change--negative]="!neutral && valueChange < 0">
+                <fa-icon class="change__dir" [icon]="neutral ? faMinus :
+                                                     valueChange > 0 ? faArrowUp : faArrowDown"/>
+                <span class="change__value">
+                    {{
+                        Math.abs(valueChange || 0) | percent: ".0-1"
+                    }}
+                </span>
+            </div>
+            <span class="divider"></span>
+            <span class="period">24h</span>
+        </div>
+    </div>
+    <div class="loader">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>

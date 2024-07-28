@@ -1,0 +1,50 @@
+<app-loader [show]="loading"/>
+
+<app-wallet-header title="Transaction" [params]="{ id: null }"/>
+
+<span *ngIf="badId" class="error">
+    Transaction with such id doesn't exist, isn't confirmed, or doesn't belong to your wallet 🤷‍♀️
+</span>
+<ng-container *ngIf="!badId">
+    <div class="table">
+        <div class="row">
+            <span class="name">ID:</span>
+            <span class="content">{{ tx?.id }}</span>
+        </div>
+        <div class="row">
+            <span class="name">Timestamp:</span>
+            <span class="content">{{ tx?.time | date: "dd.MM.yyyy, HH:mm:ss" }}</span>
+        </div>
+        <div class="row">
+            <span class="name">Confirmed:</span>
+            <span class="content">
+            {{ tx?.confirmations }} time{{ (tx?.confirmations || 0) != 1 ? 's' : '' }}
+        </span>
+        </div>
+        <div class="row">
+            <span class="name">{{ tx?.amount?.isPositive() ? "Received on" : "Sent to" }}:</span>
+            <span class="content" *ngIf="tx?.addresses">
+                <ng-container *ngFor="let addr of tx!.addresses; index as i">
+                    {{ addr }}
+                    <ng-container *ngIf="i + 1 < tx!.addresses.length"><br></ng-container>
+                </ng-container>
+            </span>
+        </div>
+        <div class="row">
+            <span class="name">Amount:</span>
+            <span class="content">
+            {{ tx?.amount?.abs()?.toNumber()?.toFixed(coin?.decimals) }} {{ coin?.shortName }}
+        </span>
+        </div>
+        <div class="row">
+            <span class="name">Fee:</span>
+            <span class="content">
+            {{ tx?.fee?.toNumber()?.toFixed(coin?.decimals) }} {{ coin?.shortName }}
+        </span>
+        </div>
+    </div>
+    <a class="button link" [href]="'https://blockstream.info/tx/' + tx?.id" target="_blank">
+        View in explorer
+        <fa-icon class="link__icon" [icon]="faArrowUpRightFromSquare"/>
+    </a>
+</ng-container>

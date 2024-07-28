@@ -1,0 +1,22 @@
+@if (window.isMobile()) {
+    <div class="router" [@routeAnimations]="getRouteAnimationData()">
+        <router-outlet/>
+    </div>
+} @else {
+    <div class="container">
+        <div class="sidebar">
+            <app-menu/>
+        </div>
+        <div class="content">
+            <app-float-bar class="nav" [links]="window.menuItems" [id]="window.menuId"/>
+            <div class="frame__background">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="frame" [@routeAnimations]="getRouteAnimationData()">
+                <router-outlet/>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,45 @@
+<div class="container">
+
+    <app-wallet-header title="Import privates" />
+
+    <p class="description" [ngSwitch]="coin.shortName.toLowerCase()">
+        <!-- TODO Add coin texts -->
+        <ng-container *ngSwitchCase="'btc'">
+            Enter your private keys below. Hexadecimal representations
+            (compressed or not) and in the format used by the Bitcoin Core’s
+            “dumprivkey” command are allowed. Pecunia doesn’t send coins from
+            the keys to your wallet, but directly imports it to the wallet,
+            so you lose nothing on fees, need to wait about 15 minutes though,
+            until use your wallet again
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            Enter your private keys below. This will add the keys to
+            your wallet. You'll probably have to wait a while
+        </ng-container>
+    </p>
+
+    <span *ngIf="error" class="error">
+        Please double-check the keys and try again. Do not import
+        keys you have already imported or that are belonging to the wallet
+    </span>
+
+    <div class="content">
+        <div class="inputs" [class.inputs--inactive]="loading" #inputs>
+            <app-input placeholder="Private key" class="app-input" [disabled]="loading"
+                       *ngFor="let key of keys; index as i" [formControl]="key.form"
+                       (apply)="inputs.scrollBy(0, 0);
+                            setInputElement(key, input)" #input />
+            <div *ngIf="keys.length < MAX_KEY_COUNT" class="add">
+                <fa-icon [icon]="faPlus" (click)="addForm()"/>
+            </div>
+        </div>
+
+        <button class="button" (click)="import()"
+                [class.inactive]="!valid"
+                [class.loading]="loading">
+            Import privates
+            <fa-icon class="icon" [icon]="faDiagramNext"/>
+            <div *ngIf="loading" class="loader"><span></span><span></span><span></span></div>
+        </button>
+    </div>
+</div>

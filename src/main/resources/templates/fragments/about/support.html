@@ -1,0 +1,22 @@
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+
+<input id="csrf" type="hidden" th:name="${_csrf.headerName}" th:value="${_csrf.token}">
+
+<div class="support">
+
+    <div id="container" class="dynamic"></div>
+
+    <script th:src="@{/scripts/support.js}"></script>
+    <script defer>
+        dynamicContainer = document.querySelector("#container");
+        checkHash();
+
+        window.addEventListener("hashchange", checkHash);
+
+        function back() {
+            if (window.location.hash.substring(1) === pages[0].name)
+                history.back();
+            else history.back();
+        }
+    </script>
+</div>

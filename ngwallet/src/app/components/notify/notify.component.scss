@@ -1,0 +1,107 @@
+@use "variables" as *;
+
+.holder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    z-index: 999999;
+    padding: 10px 20px;
+    background: #fff;
+    transition: opacity .15s ease-out;
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+    height: 100%;
+    width: max-content;
+    max-height: 500px;
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 20px;
+    margin-bottom: 10px;
+
+    h1 {
+        font-size: 68px;
+    }
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    * {
+        font-size: 24px;
+        text-align: justify;
+        line-height: 1.35;
+    }
+
+    span {
+        &:nth-child(odd) {
+            align-self: flex-start;
+        }
+
+        &:nth-child(even) {
+            align-self: flex-end;
+        }
+    }
+}
+
+.controls {
+    button {
+        text-transform: uppercase;
+        font-family: "Ubuntu", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, $blue-dark, $blue-darker, $blue-darker 65%, $blue-dark);
+        box-shadow: 1px 3px 5px -2px $blue;
+        color: $milky;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 626px) {
+    .container {
+        padding: 60px 40px;
+        background: radial-gradient( 300px, fade-out($blue, .98), fade-out($blue-darker, .97));
+        border-radius: 35px;
+        box-shadow: 0 0 20px 3px fade-out($blue, .9);
+    }
+}
+
+@media (max-width: 625px) {
+    .holder {
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .container {
+        gap: 30px;
+    }
+
+    .header {
+        margin-bottom: 0;
+    }
+}

@@ -1,0 +1,147 @@
+@use "variables" as *;
+
+:host {
+    padding: 10px 0;
+
+    &.loading {
+        .loader {
+            opacity: 1;
+        }
+
+        .statistics {
+            opacity: 0;
+        }
+    }
+
+    &:not(.loading) {
+        .statistics {
+            transition: opacity .1s ease-in-out;
+            opacity: 1;
+        }
+    }
+}
+
+.chart {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    height: 240px;
+}
+
+.statistics-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    .statistics {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        .change {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+
+            &__dir {
+                font-size: 12px;
+            }
+
+            &--negative {
+                * {
+                    color: $red-light;
+                }
+            }
+
+            &--positive {
+                * {
+                    color: #47EA2D;
+                }
+            }
+
+            &--neutral {
+                * {
+                    color: fade-out($blue-darker, .15);
+                }
+                fa-icon {
+                    opacity: .5;
+                }
+            }
+        }
+
+        .divider {
+            width: 4px;
+            height: 4px;
+            border-radius: 3px;
+            background-color: fade-out($blue-darker, .8);
+        }
+
+        .period {
+            font-size: 14px;
+            color: fade-out($blue-darker, .4);
+        }
+    }
+}
+
+.loader {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    width: fit-content;
+    height: 35px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    opacity: 0;
+    transition: opacity .15s ease-in-out;
+
+    span {
+        display: inline-block;
+        width: 10px;
+        //height: 15px;
+        border-radius: 15px;
+        background-color: fade-out($blue-darker, .3);
+        height: 35px;
+        transform: translateY(25px);
+
+        &:nth-child(1) {
+            animation: loadingA 1.5s 1s infinite;
+        }
+
+        &:nth-child(2) {
+            animation: loadingA 1.5s 0.5s infinite;
+        }
+
+        &:nth-child(3) {
+            animation: loadingA 1.5s 0s infinite;
+        }
+
+    }
+}
+
+@keyframes loadingA {
+    0% {
+        transform: translateY(25px);
+    }
+    50% {
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(25px);
+    }
+}
+
+
+@media (max-width: 924px) and (min-width: 425px) {
+    .chart {
+        height: 270px;
+    }
+}

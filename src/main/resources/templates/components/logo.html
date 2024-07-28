@@ -1,0 +1,6 @@
+<div th:class="${'logo logo--' + theme}" th:fragment="logo" th:with="type=${type ?: 'full'}, style=${style}, theme=${theme ?: 'dark'}">
+
+    <img th:src="@{${'/images/' + (style == 'solid' ? 'favicon.png' : 'logo.png')}}">
+    <h1 th:if="${type == 'full'}">Pecunia Wallet</h1>
+
+</div>

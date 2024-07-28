@@ -1,0 +1,36 @@
+{
+  "type": "module",
+  "scripts": {
+    "minifyCss": "gulp minifyCss",
+    "minifyJs": "gulp minifyJs"
+  },
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-autoprefixer": "^9.0.0",
+    "gulp-minify": "^3.1.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-uglifycss": "^1.1.0"
+  },
+  "dependencies": {
+    "gulp-minifier": "^3.5.0"
+  },
+  "browserslist": {
+    "production": [
+      "> 0.2%",
+      "last 1 ie version",
+      "last 5 edge versions",
+      "last 10 chrome versions",
+      "last 10 chromeAndroid versions",
+      "last 7 android versions",
+      "last 10 firefox versions",
+      "last 10 firefoxAndroid versions",
+      "last 3 safari versions",
+      "last 2 ios versions",
+      "last 7 opera versions",
+      "last 5 operaMobile versions",
+      "last 5 samsung versions",
+      "last 3 ucAndroid versions",
+      "not dead"
+    ]
+  }
+}

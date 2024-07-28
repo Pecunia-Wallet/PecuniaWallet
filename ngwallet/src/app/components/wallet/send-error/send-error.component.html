@@ -1,0 +1,33 @@
+<app-wallet-header title="Error :(" [params]="{code: null, id: null}" />
+
+<div class="content">
+    <div class="head">The operation failed:</div>
+    <div class="message" *ngIf="coin" [ngSwitch]="code">
+        <ng-container *ngSwitchCase="-300">
+            {{ coin.fullName.toUpperCase().charAt(0) + coin.fullName.toLowerCase().substring(1) }}
+            network declined the transaction as dusty.
+            It may happen if you try to send too low amount, set too low fee, other.
+        </ng-container>
+        <ng-container *ngSwitchCase="-400">
+            Insufficient money. Try to lower the fee or enable subtraction from amount.
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            The transaction declined by network.
+        </ng-container>
+    </div>
+    <div class="options">
+        <div class="option"><span class="option__name">You can edit transaction:</span>
+            <button class="button" (click)="edit()">
+                Edit transaction
+                <fa-icon [icon]="faPenToSquare" />
+            </button>
+        </div>
+        <div class="option"><span class="option__name">Or return to the main page:</span>
+            <button class="button" routerLink="/wallet/coin" queryParamsHandling="merge"
+                    [queryParams]="{code: null}">
+                Return to main
+                <fa-icon [icon]="faHome" />
+            </button>
+        </div>
+    </div>
+</div>

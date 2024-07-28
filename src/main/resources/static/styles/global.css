@@ -1,0 +1,16 @@
+:root {
+    --red-light: #E84545;
+    --red-dark: #903749;
+    --red-darker: #53354A;
+    --pink: #EE99C2;
+    --milky: #F9F7F7;
+    --beige: #F9F5EB;
+    --sandy: #EAE3D2;
+    --blue-darker: #2B2E4A;
+    --blue-dark: #1C3879;
+    --blue: #607EAA;
+    --sea: #176B87;
+    --teal: #64CCC5;
+
+    font-family: "Ubuntu", sans-serif;
+}

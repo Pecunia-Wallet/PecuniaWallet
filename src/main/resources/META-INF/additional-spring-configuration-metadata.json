@@ -1,0 +1,144 @@
+{
+  "properties": [
+    {
+      "name": "bucket.overdraft",
+      "type": "java.lang.Long",
+      "description": "BucketJ overdraft."
+    },
+    {
+      "name": "bucket.refill.period",
+      "type": "java.time.Duration",
+      "description": "BucketJ refill period."
+    },
+    {
+      "name": "bucket.refill.amount",
+      "type": "java.lang.Long",
+      "description": "BucketJ refill amount."
+    },
+    {
+      "name": "authorization.token.length",
+      "type": "java.lang.Integer",
+      "description": "Length of wallet access token."
+    },
+    {
+      "name": "authorization.token.lifetime",
+      "type": "java.time.Duration",
+      "description": "Lifetime of wallet access token."
+    },
+    {
+      "name": "authorization.cookie.name",
+      "type": "java.lang.String",
+      "description": "Name of cookie storing access token."
+    },
+    {
+      "name": "lock.cookie.name",
+      "type": "java.lang.String",
+      "description": "Name of cookie storing lock permission token."
+    },
+    {
+      "name": "lock.token.length",
+      "type": "java.lang.Integer",
+      "description": "Length of lock permission token."
+    },
+    {
+      "name": "lock.token.lifetime",
+      "type": "java.time.Duration",
+      "description": "Lifetime of lock permission token."
+    },
+    {
+      "name": "authorization.token.max",
+      "type": "java.lang.Integer",
+      "description": "Number of max authorization tokens."
+    },
+    {
+      "name": "lock.token.max",
+      "type": "java.lang.Integer",
+      "description": "Number of max lock tokens."
+    },
+    {
+      "name": "app.mode",
+      "type": "com.pecuniawallet.types.AppMode",
+      "description": "Application running mode."
+    },
+    {
+      "name": "app.promo",
+      "type": "java.lang.Boolean",
+      "description": "Is promo active."
+    },
+    {
+      "name": "app.ssl",
+      "type": "java.lang.Boolean",
+      "description": "Should app use ssl."
+    },
+    {
+      "name": "app.dir",
+      "type": "java.lang.String",
+      "description": "App's storage directory."
+    },
+    {
+      "name": "app.domain",
+      "type": "java.lang.String",
+      "description": "Host domain used to compose some in-site links."
+    },
+    {
+      "name": "app.testnet",
+      "type": "java.lang.Boolean",
+      "description": "Should use testnet blockchains."
+    },
+    {
+      "name": "bitcoin.rpc.auth.user",
+      "type": "java.lang.String",
+      "description": "Auth user for bitcoin rpc."
+    },
+    {
+      "name": "bitcoin.rpc.auth.password",
+      "type": "java.lang.String",
+      "description": "Auth password for bitcoin rpc."
+    },
+    {
+      "name": "bitcoin.rpc.port.main",
+      "type": "java.lang.Integer",
+      "description": "Bitcoin rpc mainnet port."
+    },
+    {
+      "name": "bitcoin.rpc.port.test",
+      "type": "java.lang.Integer",
+      "description": "Bitcoin rpc testnet port."
+    },
+    {
+      "name": "litecoin.rpc.auth.user",
+      "type": "java.lang.String",
+      "description": "Auth user for litecoin rpc."
+    },
+    {
+      "name": "litecoin.rpc.auth.password",
+      "type": "java.lang.String",
+      "description": "Auth password for litecoin rpc."
+    },
+    {
+      "name": "litecoin.rpc.port.main",
+      "type": "java.lang.Integer",
+      "description": "Litecoin rpc mainnet port."
+    },
+    {
+      "name": "litecoin.rpc.port.test",
+      "type": "java.lang.Integer",
+      "description": "Litecoin rpc testnet port."
+    },
+    {
+      "name": "binance.uri",
+      "type": "java.lang.String",
+      "description": "Binance Market Data API URI."
+    },
+    {
+      "name": "fiat-currencies.list",
+      "type": "com.pecuniawallet.model.FiatCurrency[]",
+      "description": "Supported fiat currencies."
+    },
+    {
+      "name": "fcm.conf",
+      "type": "java.io.File",
+      "description": "Firebase token file."
+    }
+  ]
+}

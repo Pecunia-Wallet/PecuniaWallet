@@ -1,0 +1,44 @@
+<app-loader [show]="loading"/>
+
+<app-wallet-header title="Funds request" link="/wallet/coin/request/build"
+                   [params]="{ amount: null, label: null, message: null, restore: null }" />
+
+<div class="content">
+    <div class="row">
+        <ngx-qrcode-styling [config]="qrConfig" #qr/>
+        <div class="request">
+            <h2 class="request__title">Request</h2>
+            <div class="request__row">
+                <span class="request__label">for</span>
+                <span class="request__value">
+                    {{ amount && coin ? dp(amount!, coin!.decimals) : null }}
+                </span>
+                <span class="currency">{{ coin ? coin.shortName : '' }}</span>
+            </div>
+            <div *ngIf="label" class="request__row">
+                <span class="request__label">to</span>
+                <span class="request__value">{{ decodeURI(label) }}</span>
+            </div>
+            <div class="request__row">
+                <span *ngIf="message" class="request__label">with a message.</span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="controls">
+            <button class="control" (click)="copy()">
+                <fa-icon [icon]="faCopy"/>
+            </button>
+            <button class="control" (click)="share()">
+                <fa-icon [icon]="faShareNodes"/>
+            </button>
+            <a class="control" target="_blank" href="https://github.com/bitcoin/bips/blob/master/bip-0020.mediawiki">
+                <fa-icon [icon]="faInfo"/>
+            </a>
+        </div>
+        <button class="button" (click)="edit()">
+            Edit request
+            <fa-icon [icon]="faPenToSquare" />
+        </button>
+    </div>
+</div>

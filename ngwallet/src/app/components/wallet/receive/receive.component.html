@@ -1,0 +1,47 @@
+<app-loader [show]="loading"/>
+
+<app-wallet-header title="Receive funds" />
+
+<div class="content">
+    <div class="qr" (panright)="prev()" (panleft)="next()">
+        <fa-icon [icon]="faChevronLeft" class="qr__prev"
+                 [class.active]="currentAddressIndex > 0" (click)="prev()"/>
+        <div class="qr-container" #qrContainer>
+            <ngx-qrcode-styling [config]="qrConfig" #qr/>
+        </div>
+        <fa-icon [icon]="faChevronRight" class="qr__next"
+                 [class.active]="currentAddressIndex < addresses.length - 1" (click)="next()"/>
+    </div>
+    <div class="container">
+        <div class="address">
+            <span class="address__name" [ngSwitch]="currentAddress?.type?.toLowerCase()">
+                <ng-container *ngSwitchCase="'pkh'">
+                    Legacy
+                </ng-container>
+                <ng-container *ngSwitchCase="'wpkh'">
+                    Segwit <span class="hint">(Bech32)</span>
+                </ng-container>
+            </span>
+            <span class="address__value">{{ currentAddress?.value }}</span>
+        </div>
+        <div class="controls">
+            <div class="controls__left">
+                <button class="control" (click)="copy()">
+                    <fa-icon [icon]="faCopy"/>
+                </button>
+                <button class="control" routerLink="/wallet/coin/request/build"
+                        queryParamsHandling="merge" [queryParams]="{ addr: currentAddress?.value }">
+                    <fa-icon [icon]="faLongArrowAltDown"/>
+                </button>
+                <button class="control" (click)="share()">
+                    <fa-icon [icon]="faShareNodes"/>
+                </button>
+            </div>
+            <div class="controls__right">
+                <a class="control" [href]="info" target="_blank">
+                    <fa-icon [icon]="faInfo"/>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

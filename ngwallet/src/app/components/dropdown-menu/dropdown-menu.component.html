@@ -1,0 +1,11 @@
+<div class="item" *ngFor="let item of items" (click)="item.onClick ? item.onClick() : null">
+    <ng-container *ngIf="item.icon">
+        <fa-icon class="image" [icon]="item.icon"
+                 [style.color]="item.iconColor || 'inherit'"
+                 *ngIf="isIconProp(item.icon)"/>
+        <img class="image" width="16" height="16"
+             *ngIf="!isIconProp(item.icon)"
+             [ngSrc]="server + item.icon">
+    </ng-container>
+    <span>{{ item.text }}</span>
+</div>

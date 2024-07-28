@@ -1,0 +1,24 @@
+<app-wallet-header title="Success!" [params]="{id: null, code: null}" />
+
+<div class="content">
+    <div class="message">
+        <fa-icon [icon]="faCircleCheck" />
+        The transaction has been successfully placed into mempool!
+    </div>
+    <div class="options">
+        <div class="option"><span class="option__name">You can view the transaction:</span>
+            <button class="button" routerLink="/wallet/coin/tx" queryParamsHandling="merge"
+                    [queryParams]="{id: id}">
+                View transaction
+                <fa-icon [icon]="faArrowUpRightFromSquare" />
+            </button>
+        </div>
+        <div class="option"><span class="option__name">Or return to the main page:</span>
+            <button class="button" routerLink="/wallet/coin" queryParamsHandling="merge"
+                    [queryParams]="{id: null}">
+                Return to main
+                <fa-icon [icon]="faHome" />
+            </button>
+        </div>
+    </div>
+</div>
