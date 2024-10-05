@@ -1,0 +1,34 @@
+@use "variables" as *;
+
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100dvw;
+    height: 100dvh;
+    padding: 20px;
+    background-color: fade-out($blue-darker, .97);
+}
+
+.content {
+    border-radius: 20px;
+    box-shadow: 0 0 20px -7px fade-out($blue-darker, .85);
+    background-color: #fff;
+    max-width: 1240px;
+    max-height: 792px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 924px) {
+    :host {
+        padding: 0;
+        background: none;
+    }
+
+    .content {
+        border-radius: 0;
+        box-shadow: none;
+    }
+}

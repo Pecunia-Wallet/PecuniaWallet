@@ -1,0 +1,69 @@
+@if (_window.isMobile()) {
+    <app-float-bar class="menu" [links]="_window.menuItems" [id]="_window.menuId"/>
+}
+
+<div class="container">
+    <div class="sections">
+        <div class="section">
+            <div class="section__title">
+                <h3 class="section__name">Overview</h3>
+                @if (_window.isMobile()) {
+                    <app-fiat-selector direction="down"/>
+                }
+            </div>
+            <div class="section__content">
+                <app-overview/>
+            </div>
+        </div>
+        <div class="section">
+            <div class="section__title">
+                <h3 class="section__name">Portfolio</h3>
+            </div>
+            <div class="section__content section__content--coins">
+                <!-- TODO change placeholder count -->
+                <div class="placeholders">
+                    <ng-container *ngFor="let i of range(0, 1)">
+                        <div class="placeholder"
+                             [class.placeholder--shown]="!coinButtons || coinButtons.length == 0">
+                        </div>
+                    </ng-container>
+                </div>
+                <div *ngFor="let button of coinButtons" class="coin"
+                     [class.coin--active]="route.snapshot.queryParamMap.get('n')
+                            ?.toLowerCase() == button.coin.shortName.toLowerCase()"
+                     routerLink="/wallet/coin" [queryParams]="{n: button.coin.shortName}"
+                     queryParamsHandling="merge">
+                    <div class="coin__title">
+                        <img class="coin__image" [ngSrc]="server + button.coin.imageUri" width="22" height="22">
+                        <span class="coin__name">{{ button.coin.fullName }}</span>
+                    </div>
+                    <div class="coin__amounts">
+                        <div class="coin__values">
+                            <span class="coin__value">{{ button.coinBalance }}</span>
+                            <span class="coin__value coin__value--side">
+                                {{
+                                    button.fiatBalance.toNumber().toFixed(button.fiat.decimals)
+                                }}
+                            </span>
+                        </div>
+                        <div class="coin__symbols">
+                            <span class="coin__symbol">
+                                {{ button.coin.shortName }}
+                            </span>
+                            <span class="coin__symbol coin__symbol--side"> {{ button.fiat.shortName }} </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (!_window.isMobile()) {
+        <div class="controls">
+            <app-fiat-selector direction="up"/>
+            <div class="api-link">
+                <fa-icon [icon]="faCashRegister" />
+                API
+            </div>
+        </div>
+    }
+</div>

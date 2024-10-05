@@ -1,0 +1,113 @@
+<app-loader [show]="initializing"/>
+
+<app-wallet-header title="Send funds"/>
+<div class="content">
+    <div class="recipients" (swiperight)="prev()" (swipeleft)="next()" #recipientsElem>
+        <span class="recipients__label" *ngIf="currentRecipient">Recipient #{{ currentIndex + 1 }}</span>
+        <div class="recipients__controls">
+            <div class="recipients__prev" (click)="prev()"
+                 [class.inactive]="currentIndex <= 0">
+                <fa-icon [icon]="faChevronLeft"/>
+            </div>
+            <div class="recipients__next" (click)="next()"
+                 [class.inactive]="currentIndex >= recipients.length || currentIndex >= MAX_RECIPIENTS - 1">
+                <fa-icon [icon]="faChevronRight"/>
+            </div>
+        </div>
+        <div class="recipients__container">
+            <div class="recipients__slider"
+                 [style.transform]="'translateX(-' +
+                  (currentIndex * (recipientsElem.clientWidth + 30)) + 'px)'"
+                 [style.gap]="'30px'" #slider>
+                <div class="recipient" *ngFor="let recipient of recipients"
+                     [style.max-width]="recipientsElem.clientWidth + 'px'"
+                     [formGroup]="recipient.form" (apply)="recipient.element = recipientElem"
+                     #recipientElem>
+                    <div class="app-input-group">
+                        <span class="app-input-group__title"
+                              [class.error]="recipient.addressValid == false ||
+                              isAddressRepeating(recipient)">
+                            Address
+                            <span *ngIf="isAddressRepeating(recipient)"
+                                          class="error error-hint">*duplicate</span>
+                        </span>
+                        <app-input class="app-input" [error]="recipient.addressValid == false ||
+                        isAddressRepeating(recipient)"
+                                   formControlName="address"/>
+                    </div>
+                    <div class="app-input-group">
+                        <span class="app-input-group__title">Amount</span>
+                        <div class="app-input-row" *ngIf="coin">
+                            <app-input class="app-input" type="number" [min]="0"
+                                       [step]="1 / Math.pow(10, coin.decimals)"
+                                       formControlName="amountCoins"/>
+                            <span class="currency">{{ coin.shortName.toUpperCase() }}</span>
+                        </div>
+                        <div class="app-input-row" *ngIf="currency">
+                            <app-input class="app-input" type="number" [min]="0"
+                                       [step]="1 / Math.pow(10, currency.decimals)"
+                                       formControlName="amountFiat"/>
+                            <span class="currency">{{ currency.shortName.toUpperCase() }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="recipients.length < MAX_RECIPIENTS"
+                     class="recipient recipient--add"
+                     [style.max-width]="recipientsElem.clientWidth + 'px'" #func>
+                    <div class="recipient__container">
+                        <div class="recipient__button" (click)="add()">
+                            <fa-icon [icon]="faPlus"/>
+                        </div>
+                        Add recipient
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="info">
+        <div class="info__row">
+            <span class="info__title">Current balance:</span>
+            <span class="info__text" *ngIf="coin">
+                {{ dp(balance, coin.decimals) }}
+                <span class="currency">
+                {{ coin.shortName.toUpperCase() }}
+            </span>
+            </span>
+        </div>
+        <div class="info__row">
+            <span class="info__title">Total recipients:</span>
+            <span class="info__text info__text--tight">
+                {{ totalRecipients }} <span class="hint">/</span> {{ MAX_RECIPIENTS }}
+            </span>
+        </div>
+        <div class="info__row">
+            <span class="info__title">Total spend:</span>
+            <span class="info__text" *ngIf="coin">
+                {{ dp(totalAmount, coin.decimals) }}
+                <span class="currency">
+                {{ coin.shortName.toUpperCase() }}
+            </span>
+            </span>
+        </div>
+        <div class="info__row error error--money" *ngIf="insufficientMoney | async">
+            <fa-icon [icon]="faCircleExclamation" />
+            Insufficient money
+        </div>
+    </div>
+    <div class="controls">
+        <button class="button button--side" (click)="readRequest()"
+                [class.inactive]="this.recipients.length >= MAX_RECIPIENTS && !hasEmpty"
+                [class.loading]="false">
+            From request
+            <img class="icon" [ngSrc]="server + '/images/scan.svg'" width="17" height="17"/>
+            <div *ngIf="false" class="loader"><span></span><span></span><span></span></div>
+        </button>
+        <button class="button" (click)="confirm()"
+                [class.inactive]="!valid || (insufficientMoney | async)"
+                [class.loading]="loading">
+            Next step
+            <fa-icon class="icon" [icon]="faArrowRight"/>
+            <div *ngIf="false" class="loader"><span></span><span></span><span></span></div>
+        </button>
+    </div>
+</div>

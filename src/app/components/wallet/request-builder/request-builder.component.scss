@@ -1,0 +1,92 @@
+@use "variables" as *;
+@use "../layout";
+
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    max-width: 350px;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 27px;
+    width: 100%;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 7px;
+
+    &__title {
+        margin-bottom: 5px;
+        letter-spacing: .05em;
+        font-size: 16px;
+        margin-left: 10px;
+        font-weight: 500;
+    }
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.app-input {
+    width: 100% !important;
+}
+
+.app-input-input-wrapper {
+    width: 100% !important;
+}
+
+.currency {
+    font-size: 18px;
+    letter-spacing: .05em;
+    color: fade-out($blue-darker, .3);
+    font-weight: bold;
+    min-width: 40px;
+    user-select: none;
+}
+
+.textarea-placeholder {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
+    height: 70px;
+
+    textarea {
+        position: absolute;
+        min-height: 70px;
+        max-height: 245px;
+        width: 100%;
+        resize: vertical;
+        z-index: 2;
+        font-family: "Ubuntu", sans-serif;
+    }
+}
+
+.hint {
+    margin-left: 10px;
+    font-size: 14px;
+    color: fade-out($blue-darker, .35);
+    letter-spacing: .05em;
+    font-weight: lighter;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+    width: calc(100% - 10px);
+}

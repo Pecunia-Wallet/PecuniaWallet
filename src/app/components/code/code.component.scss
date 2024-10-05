@@ -1,0 +1,236 @@
+@use "variables" as *;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    gap: 20px;
+    padding-top: 20px;
+}
+
+.container {
+    flex: 1 0;
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 45px;
+    width: fit-content;
+    height: 100%;
+}
+
+.error {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    padding: 0 7px;
+    margin: -27px 0 -13px;
+
+    &__message {
+        font-size: 18px;
+        font-weight: lighter;
+        text-align: justify;
+        color: $red-light;
+        line-height: 125%;
+    }
+}
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    gap: 10px;
+
+    &--loading {
+        cursor: wait;
+    }
+
+    &--loading .key:not(.key--permanent) {
+        pointer-events: none;
+    }
+
+    &__row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+}
+
+.key {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+    font-size: 28px;
+    background: rgba(96, 126, 170, 0.05);
+    border: none;
+    cursor: pointer;
+    transition: background .07s ease-in-out;
+
+    &:hover {
+        background: rgba(96, 126, 170, 0.1);
+    }
+
+    &:active {
+        transition: background 0s;
+        background: rgba(96, 126, 170, 0.13);
+    }
+
+    &--hidden {
+        visibility: hidden;
+    }
+}
+
+.code {
+    display: flex;
+
+    &--loading {
+        cursor: wait;
+    }
+
+    &--error {
+        animation: .6s shake ease-in-out;
+    }
+
+    &:not(.code--loading) span.active {
+        animation: .2s scale ease-in-out reverse;
+    }
+
+    span {
+        display: block;
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        background: linear-gradient(30deg, rgba(96, 126, 170, 0.15), rgba(128, 128, 128, 0.1), #fff);
+        box-shadow: inset 5px 5px 3px 3px rgba(96, 126, 170, 0.03);
+        transition: background 1s ease-in-out;
+        margin: 0 11px;
+        transform-origin: center center;
+
+        &.active {
+            background: linear-gradient(120deg, rgba(28, 56, 121, 0.7) 5%, rgba(28, 56, 121), #2B2E4AFF 90%);
+            box-shadow: inset -1px 1px 2px 0 #607EAA;
+        }
+
+        &.loading {
+            animation: infinite .7s blink alternate-reverse!important;
+        }
+    }
+}
+
+.alert__image {
+    width: 20px;
+    height: 20px;
+    user-select: none;
+}
+
+@keyframes scale {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.25);
+    }
+}
+
+@keyframes blink {
+    from {
+        opacity: 0.2;
+    }
+    70% {
+        opacity: 1;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+    15% {
+        transform: translateX(5px);
+    }
+    30% {
+        transform: translateX(-5px);
+    }
+    45% {
+        transform: translateX(5px);
+    }
+    60% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+    90% {
+        transform: translateX(-5px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 325px) {
+    .content {
+        gap: 25px;
+    }
+
+    .key {
+        width: 80px;
+        height: 80px;
+    }
+
+    .code span {
+        width: 25px;
+        height: 25px;
+        margin: 10px;
+
+        .active {
+            animation: .3s scale ease-in-out reverse;
+        }
+    }
+
+    .error {
+        max-width: 265px;
+        margin: -12px 0 -7px;
+
+        &__message {
+            font-size: 16px;
+        }
+    }
+
+    @keyframes scale {
+        from {
+            transform: scale(1);
+        }
+        to {
+            transform: scale(1.5);
+        }
+    }
+}
+
+@media (pointer: none), (pointer: coarse) {
+    .key {
+        background: rgba(96, 126, 170, 0.05);
+    }
+
+    .key--touched {
+        background: rgba(96, 126, 170, 0.1);
+    }
+}

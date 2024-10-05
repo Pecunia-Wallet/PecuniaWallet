@@ -1,0 +1,33 @@
+<div class="holder" [class.hidden]="!showOverlay">
+    <div class="container">
+        <ng-container *ngTemplateOutlet="overlayTemplate"></ng-container>
+    </div>
+</div>
+
+<ng-template #errorOverlay>
+    <div class="header">
+        <img [ngSrc]="server + '/images/sad.svg'" width="128" height="128" priority>
+        <h1>Oops...</h1>
+    </div>
+    <div class="message">
+        <span>It seems that something went wrong...</span>
+        <span>But don't worry! Let's just <b>try again!</b></span>
+    </div>
+    <div class="controls">
+        <button class="controls__button" (click)="window.location.reload()">
+            reload
+        </button>
+    </div>
+</ng-template>
+
+<ng-template let-title="title" let-text="text" let-icon="icon" #notification>
+    <div class="notification">
+        <div class="message">
+            <h3 class="title" *ngIf="title?.length > 0">{{ title }}</h3>
+            <span class="text" [innerHTML]="text"></span>
+        </div>
+        <div class="notification__icon">
+            <fa-icon [icon]="icon"/>
+        </div>
+    </div>
+</ng-template>

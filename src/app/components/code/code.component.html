@@ -1,0 +1,34 @@
+<app-marquee *ngIf="promo && showPromo()">
+    <img class="alert__image" [ngSrc]="server + '/images/alert.svg'"
+                              width="20" height="20" alt="alert">
+    Promotion! We will add up to 5% daily to all open wallets! Company amount limit: $100,000,000! Hurry up!
+</app-marquee>
+
+<div class="container">
+    <div class="content">
+        <div class="header" [innerHTML]="header()"></div>
+        <div class="error" *ngIf="errorMessage">
+            <span class="error__message">
+                {{ errorMessage }}
+            </span>
+        </div>
+        <div class="code" [class.code--loading]="loading"
+                          [class.code--error]="error">
+            <span *ngFor="let i of range(0, codeLength); trackBy: nullTrack" #asterisk>
+                <ng-container (apply)="observeAsterisk(asterisk, i)"/>
+            </span>
+        </div>
+        <div class="keyboard" [class.keyboard--loading]="loading">
+            <div class="keyboard__row" *ngFor="let row of splitToRows(buttons); trackBy: nullTrack">
+                <button class="key" *ngFor="let button of reversed(row); trackBy: nullTrack"
+                        (click)="button.onclick()"
+                        (touchstart)="loading ? null : btn.classList.add('key--touched')"
+                        (touchend)="setTimeout(touchCallback(btn), 300)" #btn>
+                    <ng-container (apply)="button.render(btn)"/>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer *ngIf="showFooter()" [underlineLinks]="true" />

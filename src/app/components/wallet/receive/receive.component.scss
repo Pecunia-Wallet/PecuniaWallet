@@ -1,0 +1,92 @@
+@use "variables" as *;
+@use "../layout";
+
+:host {
+    gap: 60px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 280px;
+    gap: 40px;
+}
+
+.qr {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    &__prev, &__next {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-width: 25px;
+        font-size: 24px;
+        color: fade-out($blue-darker, .85);
+        transition: transform .15s ease-in-out, color .15s ease-in-out;
+
+        &.active {
+            cursor: pointer;
+            color: fade-out($blue-darker, .2);
+
+            &:hover {
+                color: $blue-darker;
+            }
+        }
+    }
+
+    &__prev.active:hover {
+        transform: translateX(-2px);
+    }
+
+    &__next.active:hover {
+        transform: translateX(2px);
+    }
+
+    &-container {
+        width: 164px;
+        height: 164px;
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.address {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &__name {
+        font-weight: lighter;
+
+        .hint {
+            font-size: 14px;
+            color: fade-out($blue-darker, .35);
+        }
+    }
+
+    &__value {
+        background: #f8f8f9;
+        padding: 15px 20px;
+        word-break: break-all;
+        border-radius: 10px;
+    }
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__left, &__right {
+        display: flex;
+        gap: 20px;
+    }
+}

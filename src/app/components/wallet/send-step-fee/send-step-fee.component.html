@@ -1,0 +1,41 @@
+<app-loader [show]="initializing"/>
+
+<app-wallet-header title="Edit fee" link="/wallet/coin/send"/>
+
+<div class="content">
+    <div class="sliders">
+        <div class="slider-group" *ngIf="_rawSliderOptions">
+            <div class="slider-group__title">
+                <app-dropdown class="dropdown" [items]="availableFeeUnits"
+                              [(selected)]="feeUnits" [disabled]="loading"
+                              (selectedChange)="feeUnitsChange()"/>
+                :
+            </div>
+            <ngx-slider [options]="_rawSliderOptions"
+                        [(value)]="feePerKb" (userChange)="setBlocksFromFee()" />
+        </div>
+        <div class="slider-group" *ngIf="_blocksSliderOptions">
+            <span class="slider-group__title">Blocks:</span>
+            <ngx-slider [options]="_blocksSliderOptions"
+                        [(value)]="blocks" (userChange)="setFeeFromBlocks()" />
+        </div>
+    </div>
+    <div class="input-group" *ngIf="feeUnits">
+        <app-input type="number" [min]="0" [placeholder]="feeUnits.text" [disabled]="loading"
+                   [step]="feeUnits.step" [(ngModel)]="feeInUnits" />
+        <button class="button button--side" [class.inactive]="loading"
+                (click)="applyFee()">Apply</button>
+    </div>
+    <div class="checkbox-group">
+        <app-checkbox class="checkbox" [(ngModel)]="recipientsPayFees" [disabled]="loading" #checkbox/>
+        <label (click)="loading ? null : recipientsPayFees = !recipientsPayFees">
+            Subtract fee from amount
+        </label>
+    </div>
+    <button class="button confirm-button" (click)="confirm()"
+            [class.loading]="loading" [class.inactive]="loading">
+        Send funds
+        <fa-icon [icon]="faPaperPlane"/>
+        <div *ngIf="loading" class="loader"><span></span><span></span><span></span></div>
+    </button>
+</div>

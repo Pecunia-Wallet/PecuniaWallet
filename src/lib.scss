@@ -1,0 +1,388 @@
+@use "variables" as *;
+@use "sass:math";
+
+$button: ".button" !default;
+$control: ".control" !default;
+$input: ".input" !default;
+$input-wrapper: ".input-wrapper" !default;
+$checkbox: ".checkbox" !default;
+
+@mixin _input {
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: lighter;
+    background: #f8f8f9;
+    color: fade-out($blue-darker, .25);
+    border: none;
+    border-radius: 10px;
+    transition: background-color .15s ease-in-out,
+    box-shadow .15s ease-in-out;
+    width: 100%;
+    margin: 0 3px;
+    font-family: "Ubuntu", sans-serif;
+
+    &::placeholder {
+        color: fade-out($blue-darker, .65);
+        letter-spacing: .05em;
+    }
+
+    #{$input-wrapper}:has(&) {
+        display: block;
+        position: relative;
+        width: fit-content;
+        height: fit-content;
+        margin: 0 3px;
+
+        input {
+            margin: unset;
+        }
+    }
+
+    & + .stepper {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        right: 0;
+        top: 0;
+        height: 100%;
+        width: 20px;
+        opacity: 0;
+        transition: opacity .15s ease-in-out;
+
+        &::before, &::after {
+            content: "";
+            position: absolute;
+            background: fade-out($blue-darker, .93);
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        &::before {
+            width: 70%;
+            height: 1px;
+            right: 0;
+            left: 0;
+        }
+
+        &::after {
+            width: 1px;
+            height: 70%;
+            left: -1px;
+        }
+
+        .up, .down {
+            display: flex;
+            justify-content: center;
+            font-size: 10px;
+            opacity: .65;
+            height: 100%;
+            width: 100%;
+            transition: opacity .1s ease,
+            background-color .1s ease;
+            cursor: pointer;
+
+            &:hover {
+                background: fade-out($blue-darker, .9);
+                opacity: .85;
+            }
+        }
+
+        .up {
+            padding-bottom: 4px;
+            align-items: flex-end;
+            border-top-right-radius: 10px;
+        }
+
+        .down {
+            padding-top: 4px;
+            align-items: flex-start;
+            border-bottom-right-radius: 10px;
+        }
+    }
+
+    &:not(.inactive) {
+        &:focus {
+            background: #fff;
+            box-shadow: 1px 1px 5px -1px fade-out($blue-darker, .75);
+
+            &.error {
+                box-shadow: 1px 1px 5px -1px fade-out($red-light, .75);
+            }
+        }
+
+        &:hover + .stepper {
+            opacity: 1;
+        }
+
+        & + .stepper:hover {
+            opacity: 1;
+        }
+    }
+
+    &.inactive {
+        pointer-events: none;
+        color: fade-out($blue-darker, .65);
+
+        & + .stepper {
+            pointer-events: none;
+        }
+    }
+
+    &.error {
+        color: fade-out($red-light, .25);
+        border: 1px solid fade-out($red-light, .7);
+    }
+
+    @media (pointer: coarse), (pointer: none) {
+        & + .stepper {
+            opacity: 1;
+        }
+    }
+}
+
+
+@mixin _button {
+    font-size: 16px;
+    font-weight: bolder;
+    padding: 14px 35px;
+    background-color: $blue-darker;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    border-radius: 10px;
+    text-transform: uppercase;
+    transition: opacity .15s ease-in-out,
+    color .07s ease-in-out;
+    border: none;
+    cursor: pointer;
+    font-family: "Ubuntu", sans-serif;
+    letter-spacing: .05em;
+    user-select: none;
+    position: relative;
+
+    &, .icon {
+        color: #fff;
+    }
+
+    .icon {
+        font-size: 15px;
+        transition: opacity .07s ease-in-out;
+    }
+
+    &:not(.loading):not(.inactive):hover {
+        opacity: .93;
+    }
+
+    &.inactive {
+        opacity: .5;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    &.loading {
+        color: transparent;
+        cursor: progress;
+
+        .icon {
+            opacity: 0;
+        }
+    }
+
+    &.loading .loader {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .3em;
+        width: 100%;
+        height: 100%;
+        border-radius: 100%;
+        margin: 0 auto;
+        top: 0;
+        left: 0;
+    }
+
+    &.loading .loader span {
+        display: inline-block;
+        width: .4em;
+        height: .4em;
+        border-radius: 100%;
+        background-color: $milky;
+    }
+
+    &.loading .loader span:nth-child(1) {
+        animation: bounce 1s ease-in-out infinite;
+    }
+
+    &.loading .loader span:nth-child(2) {
+        animation: bounce 1s ease-in-out 0.33s infinite;
+    }
+
+    &.loading .loader span:nth-child(3) {
+        animation: bounce 1s ease-in-out 0.66s infinite;
+    }
+
+    &--side {
+        background: #fff;
+        border: 1px solid $blue-darker;
+        color: $blue-darker;
+
+        .icon {
+            color: $blue-darker;
+        }
+    }
+
+    @keyframes bounce {
+        0%, 75%, 100% {
+            transform: translateY(0);
+        }
+
+        25% {
+            transform: translateY(-100%);
+        }
+    }
+
+    @media (max-width: 525px) {
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .input {
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    }
+}
+
+@mixin _checkbox(
+    $background: #fff,
+    $border: #d1d6ee,
+    $border-hover: rgba(96, 126, 170, .3),
+    $size: 1
+) {
+    $duration: math.div($size, 2) * 0.6s;
+    $new-border: $size;
+    display: inline-block;
+    width: calc(var(--size, 1) * 22px);
+    position: relative;
+
+    &.disabled {
+        pointer-events: none;
+
+        &:not(:has(input:checked)) {
+            --background: #{fade-out($blue-darker, .9)};
+        }
+
+        &:has(input:checked) {
+            --background: #{fade-out($blue-darker, .8)};
+            opacity: .5
+        }
+    }
+
+    &::after {
+        content: "";
+        width: 100%;
+        padding-top: 100%;
+        display: block;
+    }
+
+    * {
+        position: absolute;
+    }
+
+    input {
+        appearance: none;
+        cursor: pointer;
+        background-color: var(--background, $background);
+        border-radius: $size * 4px;
+        border: calc(var(--new-border, $size) * 1px) solid;
+        color: var(--new-border-color, $border);
+        outline: none;
+        margin: 0;
+        padding: 0;
+        transition: border math.div($duration, 3) linear,
+        color math.div($duration, 3) linear;
+    }
+
+    input:hover, input:checked {
+        --new-border: #{$size * 2};
+    }
+
+    input:hover {
+        --new-border-color: #{$border-hover};
+    }
+
+    input:checked {
+        --new-border-color: #{$blue-darker};
+        transition-delay: math.div($duration, 1.3);
+    }
+
+    input:checked + svg {
+        --dash-array: 16 93;
+        --dash-offset: 109;
+    }
+
+    svg {
+        fill: none;
+        left: 0;
+        pointer-events: none;
+        stroke: var(--stroke, $blue-darker);
+        stroke-dasharray: var(--dash-array, 93);
+        stroke-dashoffset: var(--dash-offset, 94);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2px;
+        top: 0;
+        transition: stroke-dasharray $duration, stroke-dashoffset $duration;
+    }
+
+    svg, input {
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+@mixin _control {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: #f8f8f9;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    fa-icon, img, svg {
+        transition: color .15s ease-in-out;
+        font-size: 19px;
+        color: fade-out($blue-darker, .4);
+    }
+
+    &:hover {
+        fa-icon, img, svg {
+            color: fade-out($blue-darker, .2);
+        }
+    }
+}
+
+#{$input} {
+    @include _input;
+}
+
+#{$button} {
+    @include _button;
+}
+
+#{$checkbox} {
+    @include _checkbox;
+}
+
+#{$control} {
+    @include _control;
+}

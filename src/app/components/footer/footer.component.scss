@@ -1,0 +1,111 @@
+@use "variables" as *;
+
+.footer, .footer-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.footer-container {
+    padding: 20px;
+    backdrop-filter: blur(1px);
+}
+
+.footer {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    max-width: 1024px;
+
+    &__nav, &__row {
+        display: flex;
+        column-gap: 7px;
+        align-items: baseline;
+        justify-content: center;
+    }
+
+    &__nav {
+        flex-wrap: wrap;
+        row-gap: 12px;
+    }
+
+    &__link {
+        text-decoration: none;
+        font-size: 16px;
+        position: relative;
+        cursor: default;
+
+        &::before {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            height: 1px;
+            width: 0;
+            transition: width .15s ease-out;
+        }
+
+        &:hover::before {
+            width: 100%;
+            transition: width .3s ease;
+        }
+
+        &--accent {
+            color: $milky;
+            background-color: $blue-darker;
+            padding: 5px 10px;
+            font-weight: 500;
+            transition: background-color .15s ease-in-out,
+            .15s color ease-in-out;
+
+            &::before {
+                content: none;
+            }
+
+            &:hover {
+                background-color: $milky;
+                color: $blue-darker;
+            }
+
+            &.red {
+                background-color: $red-light;
+            }
+
+            &.red:hover {
+                color: $red-light;
+                background-color: $milky;
+            }
+        }
+    }
+
+    &--dark {
+        .footer__link:not(.footer__link--accent) {
+            color: $milky;
+        }
+
+        .footer__link::before {
+            background-color: $beige;
+        }
+    }
+
+    &--light {
+        .footer__link:not(.footer__link--accent) {
+            color: $blue-darker;
+        }
+
+        .footer__link::before {
+            background-color: $blue;
+        }
+    }
+
+    &--underlined {
+        .footer__link {
+            cursor: pointer;
+            text-decoration: underline;
+
+            &::before {
+                background-color: transparent;
+            }
+        }
+    }
+}

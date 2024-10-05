@@ -1,0 +1,146 @@
+@use "variables" as *;
+@use "styles";
+
+:host {
+    display: block;
+    position: relative;
+    width: fit-content;
+
+    &::before {
+        @include styles.shine;
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        z-index: 2;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease-in-out;
+    }
+
+    &.loading {
+        position: relative;
+
+        &::before {
+            transition: opacity 0s;
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+
+    &.disabled {
+        opacity: .8;
+        pointer-events: none;
+    }
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+    width: 100%;
+    padding: 7px 10px;
+    color: $blue-darker;
+    //border: 1px solid fade-out($blue-darker, .9);
+    border-radius: 10px;
+    box-shadow: 2px 2px 7px fade-out($blue-darker, .9);
+    cursor: pointer;
+    transition: background-color .1s ease-in-out;
+    background: #fff;
+
+    &:hover {
+        background-color: #f8f8f9;
+    }
+}
+
+.item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    user-select: none;
+
+    &__image {
+        max-width: 25px;
+        max-height: 25px;
+        border-radius: 3px;
+    }
+
+    &__content {
+        display: flex;
+        gap: 5px;
+    }
+
+    &__spec {
+        font-weight: bold;
+        color: fade-out($blue-darker, .15);
+    }
+
+    &__text {
+        font-weight: bold;
+    }
+}
+
+.switch {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+
+    &__divider {
+        width: 1px;
+        min-height: 23px;
+        height: 100%;
+        background-color: fade-out($blue-darker, .93);
+
+    }
+
+    &__arrow {
+        font-size: 14px;
+        opacity: .7;
+    }
+}
+
+.items {
+    overflow: hidden;
+    position: absolute;
+    top: calc(var(--top-pos) + 5px);
+    bottom: calc(var(--bottom-pos) + 5px);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    background: #fff;
+    //border: 1px solid fade-out($blue-darker, .9);
+    box-shadow: 0 0 7px fade-out($blue-darker, .9);
+    border-radius: 7px;
+    z-index: 10;
+
+    .item {
+        cursor: pointer;
+        padding: 7px 10px;
+        transition: background-color .1s ease-in-out;
+
+        &:hover {
+            background-color: fade-out($blue-darker, .95);
+        }
+
+        &:not(:last-child) {
+            position: relative;
+
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                left: 0;
+                height: 1px;
+                background: fade-out($blue-darker, .97);
+                top: 100%;
+            }
+        }
+    }
+}

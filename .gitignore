@@ -1,0 +1,97 @@
+### Secure ###
+application.yaml
+application.yml
+application.properties
+passwords/
+ssl/
+*-firebase-adminsdk-*.json
+firebase.json
+
+### Minified files ###
+*.min.css
+*.min.js
+
+### Gradle ###
+.gradle
+gradlew
+gradlew.bat
+gradle/
+!gradle/wrapper/gradle-wrapper.properties
+
+### Node.js ###
+node_modules/
+package-lock.json
+
+### Builds ###
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+qodana.yaml
+
+### VS Code ###
+.vscode/
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# System files
+.DS_Store
+Thumbs.db
+
+.nx/cache
+.nx/workspace-data
+
+## Misc ###
+check-jar-sha1.sh
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+

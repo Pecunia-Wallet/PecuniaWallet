@@ -1,0 +1,51 @@
+<app-loader [show]="loading"/>
+
+<app-wallet-header title="Read request" link="/wallet/coin/send"/>
+
+<div class="content">
+    <div class="input-group">
+        <span class="input-group__title">Enter request here:</span>
+        <textarea class="input" (apply)="input.focus({ preventScroll: true })"
+                  [formControl]="request" #input></textarea>
+        <span *ngIf="parsed.malformed" class="error">Malformed request</span>
+        <span *ngIf="parsed.invalidNetwork" class="error">Inappropriate network: {{ parsed.network }}</span>
+    </div>
+    <div class="parsed">
+        <div class="parsed__row" *ngIf="parsed.address">
+            <span class="parsed__title">Address:</span>
+            <span class="parsed__value"
+                  [class.parsed__value--error]="parsed.invalidAddress">
+                {{ parsed.address }}
+            </span>
+        </div>
+        <div class="parsed__row"
+             *ngIf="!parsed.invalidAmount && parsed.amount && coin">
+            <span class="parsed__title">Amount:</span>
+            <div>
+                <span class="parsed__value">
+                    {{ dp(BigNumber(parsed.amount), coin.decimals) }}
+                </span>
+                <span class="currency">
+                    {{ coin.shortName.toUpperCase() }}
+                </span>
+            </div>
+        </div>
+        <div class="parsed__row" *ngIf="parsed.label">
+            <span class="parsed__title">Label:</span>
+            <span class="parsed__value">
+                {{ parsed.label }}
+            </span>
+        </div>
+        <div class="parsed__row" *ngIf="parsed.message">
+            <span class="parsed__title">Message:</span>
+            <span class="parsed__value">
+                {{ parsed.message }}
+            </span>
+        </div>
+    </div>
+    <button class="button" (click)="confirm()"
+            [class.inactive]="!canPass">
+        Continue
+        <fa-icon [icon]="faArrowRight"/>
+    </button>
+</div>

@@ -1,0 +1,5 @@
+<app-dropdown class="dropdown"
+              [expandDirection]="direction"
+              [items]="$any(currencies$ | async)"
+              [selected]="selected"
+              (selectedChange)="selectCurrency($event.text)"/>

@@ -1,0 +1,391 @@
+@use "variables" as *;
+
+:host {
+    display: block;
+    padding: 30px 10px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 20px;
+    gap: 32px;
+    height: 100%;
+}
+
+.button-back {
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    font-size: 20px;
+    color: fade-out($blue-darker, .4);
+    cursor: pointer;
+    transition: background-color .15s ease-in-out,
+    color .15s ease-in-out;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+        background: fade-out($blue-darker, .93);
+        color: fade-out($blue-darker, .3);
+    }
+}
+
+.title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+
+    h1 {
+        font-size: 36px;
+        font-weight: normal;
+    }
+}
+
+.balances {
+    display: flex;
+    gap: 10px;
+
+    .amount {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        &__value {
+            font-size: 26px;
+        }
+
+        &__currency {
+            font-size: 20px;
+            font-weight: 500;
+            color: fade-out($blue-darker, .3);
+        }
+    }
+
+    .divider {
+        align-self: stretch;
+        width: 1px;
+        background: fade-out($blue-darker, .9);
+    }
+}
+
+.btn-controls {
+    display: flex;
+    align-items: center;
+    gap: 65px;
+
+    .btn-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color .15s ease-in-out;
+
+        &:hover:not(&--more), &--more.hover {
+            button {
+                background: fade-out($blue-darker, .93);
+            }
+        }
+
+        &-wrapper {
+            width: fit-content;
+            position: relative;
+        }
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: none;
+            background: #f8f8f9;
+            height: 60px;
+            width: 60px;
+            cursor: pointer;
+
+            &, & > span, & > span > span {
+                transition: background-color .1s ease-in-out;
+            }
+        }
+
+        & > span {
+            font-size: 14px;
+            text-transform: capitalize;
+            color: fade-out($blue-darker, .3);
+        }
+
+        &--send, &--receive {
+            button {
+
+                fa-icon {
+                    font-size: 21px;
+                    color: fade-out($blue-darker, .25);
+                    transition: transform .45s $spring-easing;
+                }
+            }
+        }
+
+        &--more {
+            position: relative;
+            margin-left: -10px;
+
+            button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                & > span {
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    height: 9px;
+                    border-radius: 30%;
+                    position: relative;
+                }
+
+                & > span > span {
+                    border-radius: 50%;
+                    background: fade-out($blue-darker, .25);
+                    width: 9px;
+                    height: 9px;
+                }
+            }
+        }
+    }
+}
+
+@keyframes jump {
+    50% {
+        transform: translateY(-6px);
+    }
+    70% {
+        transform: translateY(2px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.transactions {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    max-width: 392px;
+    position: relative;
+    scrollbar-gutter: stable both-edges;
+    padding: 5px 0;
+    margin: -5px 0;
+
+    &__none {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: fade-out($blue-darker, .5);
+        font-size: 18px;
+        font-weight: lighter;
+    }
+
+    &-title {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        max-width: 392px;
+        gap: 15px;
+
+        span {
+            text-transform: capitalize;
+            letter-spacing: .05em;
+            font-weight: normal;
+            font-size: 20px;
+            color: fade-out($blue-darker, .15);
+            text-align: left;
+        }
+
+        fa-icon {
+            font-size: 16px;
+            color: fade-out($blue-darker, .3);
+        }
+    }
+
+    .transaction {
+        max-width: 380px;
+        border: 1px solid fade-out($blue-darker, .93);
+        padding: 0 14px 0 7px;
+        width: 100%;
+        min-height: 70px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        transition: background-color .1s ease-in-out;
+
+        &:not(:last-child) {
+            border-bottom: none;
+        }
+
+        &:first-child {
+            border-top-right-radius: 10px;
+            border-top-left-radius: 10px;
+        }
+
+        &:last-child {
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        &:hover {
+            background: fade-out($blue-darker, .97);
+        }
+
+        &__icon {
+            min-width: 32px;
+            min-height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            box-shadow: 0 0 4px -2px fade-out($blue-darker, .5);
+
+            fa-icon {
+                color: #fff;
+                font-size: 18px;
+                transform: rotate(45deg);
+            }
+
+            &--receive fa-icon {
+                color: #47EA2D;
+            }
+
+            &--send fa-icon {
+                color: $red-light;
+            }
+        }
+
+        &__body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        &__info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        &__id {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 4px;
+
+            a {
+                font-size: 14px;
+                font-weight: lighter;
+                color: $blue;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            button {
+                position: relative;
+                border: none;
+                background: none;
+                cursor: pointer;
+
+                fa-icon {
+                    font-size: 10px;
+                    color: fade-out($blue-darker, .5);
+                }
+            }
+
+            &-container {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            &-label {
+                font-size: 16px;
+                text-transform: uppercase;
+            }
+        }
+
+        &__timestamp {
+            font-size: 12px;
+            color: fade-out($blue-darker, .5);
+        }
+
+        &__values {
+            display: flex;
+            align-items: flex-end;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        &__value {
+            display: flex;
+            align-items: center;
+            letter-spacing: .05em;
+            gap: 7px;
+
+            &--fee {
+                span {
+                    &:nth-child(1) {
+                        font-size: 12px;
+                        font-weight: lighter;
+                        color: fade-out($blue-darker, .5);
+                    }
+
+                    &:nth-child(2) {
+                        font-size: 14px;
+                        color: fade-out($blue-darker, .4);
+                    }
+                }
+            }
+        }
+
+        &__amount {
+            font-size: 16px;
+            font-weight: 400;
+
+            &--fee {
+                font-size: 14px;
+            }
+        }
+
+        &__symbol {
+            font-size: 12px;
+            font-weight: bold;
+            color: fade-out($blue-darker, .3);
+
+            &--fee {
+                color: fade-out($blue-darker, .45);
+            }
+        }
+    }
+}

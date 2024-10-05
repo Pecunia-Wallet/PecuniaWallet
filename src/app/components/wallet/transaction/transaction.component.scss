@@ -1,0 +1,35 @@
+@use "variables" as *;
+@use "../layout";
+
+:host {
+    padding: 35px 30px 10px;
+    gap: 50px;
+}
+
+.table {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    .row {
+        display: grid;
+        align-items: flex-start;
+        grid-template-columns: minmax(95px, 130px) minmax(180px, 1fr);
+
+        .name {
+            width: 95px;
+            grid-row: 1;
+            font-size: 16px;
+        }
+
+        .content {
+            word-wrap: break-word;
+            min-width: 180px;
+            grid-row: 1;
+            font-size: 14px;
+            font-weight: 500;
+            max-height: 125px;
+            overflow-y: auto;
+        }
+    }
+}

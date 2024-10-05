@@ -1,0 +1,110 @@
+@use "variables" as *;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+        background: none;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        transition: background-color .07s ease;
+        background: fade-out($blue-darker, .65);
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: fade-out($blue-darker, .45);
+    }
+
+    &::-webkit-scrollbar-button {
+        height: 5px;
+        width: 2px;
+        background: none;
+    }
+}
+
+html, body {
+    overflow-x: hidden;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+.simple-notification {
+    border-radius: 15px;
+    background: #fff !important;
+    box-shadow: 3px 3px 5px -2px fade-out($blue-darker, .75);
+
+    &-wrapper {
+        width: unset !important;
+    }
+
+    * {
+        padding: 0 !important;
+        color: $blue-darker;
+    }
+
+    .notification {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 12px 0 !important;
+
+            .title {
+                font-size: 22px;
+            }
+
+            .text {
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                font-size: 16px;
+
+                img {
+                    margin-left: 4px;
+                }
+            }
+        }
+
+        &__icon {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            fa-icon {
+                font-size: 42px;
+            }
+        }
+
+    }
+}

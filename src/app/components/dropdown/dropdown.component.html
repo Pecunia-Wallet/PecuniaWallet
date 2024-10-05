@@ -1,0 +1,45 @@
+<div class="container" (click)="toggle()">
+    <div class="item" *ngVar="getSelected() as item">
+        <img class="item__image" *ngIf="item?.image?.url"
+             [ngSrc]="item!.image!.url" priority
+             [width]="item!.image?.width || 25"
+             [height]="item!.image?.width || 15"
+             (load)="loading = false">
+        <div class="item__content">
+            <span class="item__spec">
+                {{ item?.spec }}
+            </span>
+            <span class="item__text">
+                {{ item?.text }}
+            </span>
+        </div>
+    </div>
+
+    <div class="switch">
+        <span class="switch__divider"></span>
+        <fa-icon class="switch__arrow"
+                 [icon]="expanded ? faChevronUp : faChevronDown"/>
+    </div>
+</div>
+
+<div class="items" *ngIf="expanded"
+     [style.--top-pos]="expandDirection == 'up' ? '0' : '100%'"
+     [style.--bottom-pos]="expandDirection == 'down' ? '0' : '100%'">
+    <ng-container *ngFor="let item of items">
+        <div *ngIf="!selected.equals(item)" class="item"
+             (click)="onItemClick(item)">
+            <img class="item__image" *ngIf="item?.image?.url"
+                 [ngSrc]="item?.image?.url || ''"
+                 [width]="item?.image?.width || 25"
+                 [height]="item?.image?.width || 15">
+            <div class="item__content">
+            <span class="item__spec">
+                {{ item?.spec }}
+            </span>
+            <span class="item__text">
+                {{ item?.text }}
+            </span>
+            </div>
+        </div>
+    </ng-container>
+</div>

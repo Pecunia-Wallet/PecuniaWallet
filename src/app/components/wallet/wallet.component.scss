@@ -1,0 +1,156 @@
+@use "variables" as *;
+
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.sidebar {
+    height: 100%;
+    width: 100%;
+    max-width: 335px;
+    position: relative;
+    z-index: 1;
+    background: #fff;
+
+    &::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        height: 80%;
+        width: 1px;
+        background: fade-out($blue-darker, .93);
+    }
+}
+
+.content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+}
+
+.router {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 1;
+}
+
+.frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 525px;
+    max-height: 650px;
+    box-shadow: 1px 1px 7px -1px fade-out($blue-darker, .75);
+    border-radius: 25px;
+    background: #fff;
+    overflow: hidden;
+    z-index: 1;
+
+    &__background {
+        z-index: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        max-width: 525px;
+        max-height: 650px;
+
+        span {
+            display: block;
+            position: absolute;
+            border-radius: 50%;
+            background: fade-out(#F8F8F9, .2);
+
+            &:nth-child(1) {
+                width: 135px;
+                height: 135px;
+                left: -68px;
+                top: -25px;
+            }
+
+            &:nth-child(2) {
+                width: 189px;
+                height: 189px;
+                top: calc(50% - 95px);
+                right: -75px;
+            }
+
+            &:nth-child(3) {
+                width: 300px;
+                height: 300px;
+                bottom: -150px;
+                left: -150px;
+            }
+        }
+    }
+
+    &__loader {
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        overflow: hidden;
+        top: 0;
+        z-index: 110;
+
+        &:not(.active) {
+            transform: translateX(110%);
+        }
+
+        &.active {
+            animation: move 1.5s ease-in-out infinite;
+        }
+
+        &::before {
+            content: "";
+            position: absolute;
+            background-color: fade-out($blue-darker, .65);
+            width: 80%;
+            height: 100%;
+            transform-origin: center;
+            border-radius: 3px;
+        }
+    }
+
+    @keyframes move {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @keyframes scale {
+        0% {
+            transform: scaleX(.5);
+        }
+        50% {
+            transform: scaleX(1);
+        }
+        70% {
+            transform: scaleX(.4);
+        }
+    }
+
+}
+
+.nav {
+    top: 0;
+}

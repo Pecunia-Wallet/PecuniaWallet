@@ -1,0 +1,66 @@
+@use "variables" as *;
+@use "styles";
+
+$auto-constrain: true !default;
+$main: ":host" !default;
+$header: ".header" !default;
+
+@mixin main {
+    overflow-y: auto;
+    padding: 35px 45px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+
+    @media (max-width: 425px) {
+        padding: 30px 10px;
+    }
+
+}
+
+@mixin header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+
+    &__title, h1 {
+        font-size: 30px;
+        font-weight: 500;
+    }
+
+    &__back, fa-icon, button {
+        position: absolute;
+        left: 0;
+        font-size: 20px;
+        color: fade-out($blue-darker, .4);
+        cursor: pointer;
+        transition: background-color .15s ease-in-out,
+        color .15s ease-in-out;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+
+        &:hover {
+            background: fade-out($blue-darker, .93);
+            color: fade-out($blue-darker, .3);
+        }
+    }
+}
+
+@if ($auto-constrain) {
+
+    #{$main} {
+        @include main;
+    }
+
+    #{$header} {
+        @include header;
+    }
+
+}

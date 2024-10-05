@@ -1,0 +1,116 @@
+@use "variables" as *;
+
+:host {
+    --spring-duration: 650ms;
+    --control-gap: 10px;
+
+    position: absolute;
+    right: 0;
+    left: 0;
+    margin: auto;
+    padding-top: 15px;
+    display: block;
+    width: fit-content;
+    transition: transform var(--spring-duration) $spring-easing;
+    user-select: none;
+
+    &.relative {
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+
+    z-index: 100;
+}
+
+.container {
+    width: fit-content;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px -3px fade-out($blue-darker, .75);
+}
+
+.links {
+    display: flex;
+    align-items: center;
+    padding: 20px 27px 13px;
+    gap: 27px;
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 0;
+    opacity: .7;
+    transition: opacity .07s ease-out;
+
+    &__text, &__image {
+        font-size: 18px;
+    }
+
+    &__text {
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    &--active {
+        transition: opacity .1s ease-in-out;
+        opacity: 1;
+    }
+
+    &:not(&--active) {
+        cursor: pointer;
+    }
+
+    &:hover:not(&--active) {
+        opacity: .85;
+    }
+}
+
+.divider {
+    align-self: stretch;
+    width: 1px;
+    background: fade-out($blue-darker, .9);
+}
+
+.handle {
+    display: block;
+    height: 2px;
+    width: 80%;
+    max-width: 140px;
+    background: fade-out($blue-darker, .9);
+    border-radius: 2px;
+    transition: background-color .1s ease-in-out;
+
+    &-wrapper {
+        display: flex;
+        justify-content: center;
+        padding: var(--control-gap) 0;
+        cursor: pointer;
+    }
+}
+
+@media (pointer: fine) {
+    :host.hidden:not(.hover) {
+        transform: translateY(calc(var(--control-gap) * 2 + 2px - 100%));
+    }
+
+    .handle-wrapper:hover .handle {
+        background: fade-out($blue-darker, .7);
+    }
+}
+
+@media (pointer: none), (pointer: coarse) {
+    :host {
+        --control-gap: 15px;
+
+        &.hidden {
+            transform: translateY(calc(var(--control-gap) * 2 + 2px - 100%));
+        }
+    }
+
+    .handle-wrapper .handle {
+        background: fade-out($blue-darker, .7);
+    }
+}

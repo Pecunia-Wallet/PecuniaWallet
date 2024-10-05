@@ -1,0 +1,13 @@
+<input class="input"
+       [class.inactive]="disabled"
+       [class.error]="error"
+       type="text" [placeholder]="placeholder || ''"
+       step="any"
+       [(ngModel)]="value" (blur)="touched.emit()"
+       (input)="input.emit(inputElement.value)"
+       [mask]="mask"  [patterns]="patterns" [allowNegativeNumbers]="allowNegatives"
+        #inputElement>
+<div *ngIf="type == 'number'" class="stepper">
+    <fa-icon class="up" [icon]="faChevronUp" (mousedown)="startIncrease()" (mouseup)="stopChange()"/>
+    <fa-icon class="down" [icon]="faChevronDown" (mousedown)="startDecrease()" (mouseup)="stopChange()"/>
+</div>

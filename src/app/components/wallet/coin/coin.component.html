@@ -1,0 +1,123 @@
+<app-loader [show]="loading"/>
+<div class="container">
+    <div class="title" *ngIf="coin?.imageUri">
+        <fa-icon *ngIf="_window.isMobile()" class="button-back" [icon]="faArrowLeft"
+                 routerLink="/wallet" [queryParams]="{ n: null }"
+                 queryParamsHandling="merge" title/>
+        <img [ngSrc]="server + coin!.imageUri"
+             width="46" height="46">
+        <h1>{{ coin?.fullName }}</h1>
+    </div>
+    <div class="balances">
+        <div class="amount">
+            <span class="amount__value">
+                {{ coinBalance }}
+            </span>
+            <span class="amount__currency">
+                {{ coin?.shortName }}
+            </span>
+        </div>
+        <span class="divider"></span>
+        <div class="amount">
+            <span class="amount__value">
+                {{ fiatBalance }}
+            </span>
+            <span class="amount__currency">
+                {{ fiat?.shortName }}
+            </span>
+        </div>
+    </div>
+    <div class="btn-controls">
+        <div class="btn-control btn-control--send" routerLink="/wallet/coin/send" queryParamsHandling="merge">
+            <button>
+                <fa-icon [icon]="faPaperPlane"/>
+            </button>
+            <span>Send</span>
+        </div>
+        <div class="btn-control btn-control--receive" routerLink="/wallet/coin/receive" queryParamsHandling="merge">
+            <button>
+                <img [ngSrc]="server + '/images/receive.svg'" width="25" height="25">
+            </button>
+            <span>Receive</span>
+        </div>
+        <div class="btn-control-wrapper">
+            <div class="btn-control btn-control--more"
+                 (click)="toggleDropdown()"
+                 (mouseenter)="showDropdownMenu
+                                ? null
+                                : more.classList.add('hover')"
+                 (mouseleave)="showDropdownMenu
+                                ? null : more.classList.remove('hover')" #more>
+                <button>
+                    <span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <app-dropdown-menu [active]="showDropdownMenu" [items]="dropdownMenuItems"/>
+                    </span>
+                </button>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="transactions && transactions.length > 0" class="transactions-title">
+        <fa-icon [icon]="faClockRotateLeft"/>
+        <span>Transaction History</span>
+    </div>
+    <div class="transactions"
+         infinite-scroll [scrollWindow]="false"
+         [infiniteScrollDistance]="5"
+         (scrolled)="loadNextTransactionsPage(coin!).pipe(take(1)).subscribe()">
+        <span *ngIf="!transactions || transactions.length == 0" class="transactions__none">
+            No transactions found 👻
+        </span>
+        <div class="transaction" *ngFor="let tx of transactions">
+            <div class="transaction__icon"
+                 [class.transaction__icon--send]="tx.amount.isNegative()"
+                 [class.transaction__icon--receive]="tx.amount.isPositive()">
+                <fa-icon [icon]="tx.amount.isPositive() ? faArrowDown : faArrowUp"/>
+            </div>
+            <div class="transaction__body">
+                <div class="transaction__info">
+                    <div class="transaction__id-container">
+                        <span class="transaction__id-label">ID:</span>
+                        <div class="transaction__id">
+                            <a routerLink="tx" [queryParams]="{id: tx.id}" queryParamsHandling="merge">
+                                {{
+                                    (tx.id | slice: 0: 4) +
+                                    '...' +
+                                    (tx.id | slice: tx.id.length - 4: tx.id.length)
+                                }}
+                            </a>
+                            <button (click)="copyTxId(tx)">
+                                <fa-icon [icon]="faCopy"/>
+                            </button>
+                        </div>
+                    </div>
+                    <span class="transaction__timestamp">
+                        {{ tx.time | date: "dd.MM.yyyy, HH:mm" }}
+                    </span>
+                </div>
+                <div class="transaction__values">
+                    <div class="transaction__value transaction__value--amount">
+                        <span class="transaction__amount">
+                            {{ coin?.decimals ? tx?.amount?.dp(coin!.decimals) : tx.amount.toString() }}
+                        </span>
+                        <span class="transaction__symbol">
+                            {{ coin?.shortName }}
+                        </span>
+                    </div>
+                    <div class="transaction__value transaction__value--fee">
+                        <span>fee:</span>
+                        <span class="transaction__amount transaction__amount--fee">
+                            {{ coin?.decimals ? tx?.fee?.dp(coin!.decimals) : tx.fee.toString() }}
+                        </span>
+                        <span class="transaction__symbol transaction__symbol--fee">
+                            {{ coin?.shortName }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
