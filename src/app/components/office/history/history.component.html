@@ -1,0 +1,240 @@
+@if(!_window.isMobile()) {
+    <div class="sidebar">
+        <ng-container *ngTemplateOutlet="heading" />
+        <ng-container *ngTemplateOutlet="filtersTpl" />
+    </div>
+} @else {
+    <ng-container *ngTemplateOutlet="heading" />
+}
+
+<ng-template #heading>
+    <div class="heading">
+        <span>
+            <h1 class="title">Invoice History</h1>
+            <button *ngIf="_window.isMobile()" pRipple (click)="switchFiltersSidebar()">
+                <fa-icon [icon]="faFilter" />
+            </button>
+        </span>
+        <button class="reload" pRipple (click)="loadInvoices()">
+            <fa-icon [icon]="faRotateRight"/>
+        </button>
+    </div>
+</ng-template>
+
+<div class="content">
+    <div class="invoices-scroll" #invoicesScroll>
+        <div class="invoices" [style.height]="loading || totalRecords === 0 ? '100%' : 'max-content'">
+            <button (click)="showCreationDialog = true" class="invoice invoice--create" #invoiceCreate>
+                <fa-icon [icon]="faPlus"/>
+                Create New
+            </button>
+            <span class="invoices__status" *ngIf="loading || totalRecords === 0">
+                {{ loading ? 'Loading...' : filters.valid && filters.dirty && filters.touched ? 'Nothing found.' : totalRecords === 0 ? 'Nothing here yet.' : null }}
+            </span>
+            <button class="invoice" (click)="switchInvoice(invoice)"
+                    [class.invoice--expanded]="invoice.expanded"
+                    [class.invoice--loading]="invoice.loading"
+                    *ngFor="let invoice of invoices$ | async"
+                    (apply)="onInvoiceLoaded(invoice, $any(invoiceRef))" #invoiceRef>
+                <button class="invoice__expand">
+                    <fa-icon [icon]="invoice.loading ? faSpinner : faChevronDown"/>
+                </button>
+                <div class="invoice__content">
+                    <div class="invoice__head">
+                        <div class="invoice__left">
+                            @let status = getInvoiceStatus(invoice);
+                            <div class="invoice__icon"
+                                 [ngClass]="'invoice__icon--' + status"
+                                 [pTooltip]="getInvoiceDisplayStatus(invoice)"
+                                 [tooltipOptions]="{showDelay: 500}"
+                                 tooltipPosition="top">
+                                <fa-icon [icon]="status === 'pending'
+                                        ? faRotate : status === 'fail'
+                                        ? faXmark : faCheck"/>
+                            </div>
+                            <div class="invoice__info">
+                                <span class="invoice__id">
+                                    Invoice <span (click)="copyInvoiceId(invoice); $event.stopPropagation()">
+                                    #{{ invoice.id.substring(0, 3) }}-{{
+                                        invoice.id.substring(invoice.id.length - 3)
+                                    }}
+                                </span>
+                                <button class="copy" (click)="copyInvoiceId(invoice); $event.stopPropagation()">
+                                    <fa-icon [icon]="faCopy"/>
+                                </button>
+                                <button class="copy copy--link" (click)="copyInvoiceLink(invoice); $event.stopPropagation()">
+                                    <fa-icon [icon]="faLink"/>
+                                </button>
+                            </span>
+                                <span class="invoice__created">from {{ invoice.creationDate | date: "dd.MM.YYYY HH:mm" }}</span>
+                                <span class="invoice__expires">
+                                    @let expiry = getInvoiceExpiry(invoice);
+                                    @let showBraces = !_window.isMobile() && (expiry[2]?.trim()?.length || 0) > 0;
+                                    {{ expiry[0] }}
+                                    @if(!_window.isMobile()) {
+                                        {{ expiry[1] | date: "dd.MM.YYYY HH:mm" }}
+                                    }
+                                    @if (showBraces) {(}{{ expiry[2] }}@if (showBraces) {)}
+                            </span>
+                            </div>
+                        </div>
+                        <div class="invoice__right">
+                            <span class="invoice__amount">
+                                {{ amount('requested', invoice) }} {{ invoice.sourceCurrency?.toUpperCase() }}
+                            </span>
+                            <span class="invoice__payment">
+                                @let info = getInvoicePaymentInfo(invoice);
+                                {{ info[0] }}<span>{{ info[1] }}</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="invoice__body">
+                        <div class="invoice__purpose" *ngIf="invoice?.meta?.purpose">
+                            <span>Payment purpose:</span>
+                            <span>{{ invoice!.meta!.purpose }}</span>
+                        </div>
+                        <div class="invoice__transactions">
+                            <span>Related transactions</span>
+                            <a class="invoice__transaction" *ngFor="let tx of invoice.relatedTransactions">
+                                <button (click)="navToTx(invoice, tx); $event.stopPropagation()">
+                                    {{ tx }}
+                                </button>
+                                <button class="copy" (click)="copyTxId(tx); $event.stopPropagation()">
+                                    <fa-icon [icon]="faCopy"/>
+                                </button>
+                            </a>
+                            <span class="stub" *ngIf="!invoice.relatedTransactions?.length">
+                                No blockchain transactions.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </button>
+        </div>
+    </div>
+    <p-paginator class="paginator" [class.no-padding]="_window.isMobile()"
+                 (onPageChange)="onPageChange($event)" [totalRecords]="totalRecords || 1"
+                 [rows]="pageSize" [rowsPerPageOptions]="[5, 7, 10, 15, 20, 50, 100]"
+                 [pageLinkSize]="_window.isMobile() ? 2 : 3"/>
+</div>
+
+<ng-template #filtersTpl>
+    <form [formGroup]="filters" class="filters">
+        <app-input formControlName="search" class="search" type="text" placeholder="Search"/>
+        <div class="point">
+            <span class="point__text">at coins</span>
+            <app-currency-select formControlName="coins" mode="crypto" [multi]="true" placeholder="Select coins" />
+        </div>
+        <div class="point">
+            <span class="point__text">order by</span>
+            <div class="point__content">
+                <p-select formControlName="sort" class="select-sort" [options]="sortOptions" optionLabel="name"/>
+                <button class="button button-dir" pRipple style="--p-ripple-background: rgba(255, 255, 255, .15)"
+                        (click)="switchSortDirection()">
+                    {{ sortDirection === "asc" ? "Ascending" : "Descending" }}
+                    <fa-icon [icon]="sortDirection === 'asc' ? faArrowUp : faArrowDown"/>
+                </button>
+            </div>
+        </div>
+        <div class="point">
+            <span class="point__text">from date</span>
+            <p-date-picker formControlName="startDate" class="datepicker"
+                           placeholder="<firstAvailable>" dateFormat="dd.mm.yy"
+                           appendTo="body" [minDate]="y2025" [maxDate]="now"/>
+        </div>
+        <div class="point point--date-end">
+            <span class="point__text">to date</span>
+            <p-date-picker formControlName="endDate" class="datepicker"
+                           placeholder="<lastAvailable>" dateFormat="dd.mm.yy"
+                           appendTo="body" [minDate]="y2025" [maxDate]="now"/>
+        </div>
+    </form>
+
+    <button class="reset-button" pRipple (click)="reset()">Reset All</button>
+</ng-template>
+
+<div class="filters-sidebar-overlay" (click)="$any($event.target) === $any(overlay) ? switchFiltersSidebar() : null" *ngIf="_window.isMobile()"
+     [class.hidden]="!showFilterSidebar" #overlay>
+    <div class="filters-sidebar">
+        <div class="filters-sidebar__header">
+            <h4 class="filters-sidebar__title">Filters</h4>
+            <button pRipple (click)="switchFiltersSidebar()"><fa-icon [icon]="faXmark" /></button>
+        </div>
+
+        <ng-container *ngTemplateOutlet="filtersTpl" />
+    </div>
+</div>
+
+<p-dialog class="modal" [draggable]="false" [resizable]="false" [(visible)]="showCreationDialog"
+          header="Create Invoice" [modal]="true" [style]="{width: '500px'}" [breakpoints]="{'560px': '90vw'}">
+    <div class="form-wrapper" (keydown.enter)="$event.preventDefault()">
+        <form class="create" [class.loading]="formLoading" [formGroup]="create">
+            <div class="avatar-form">
+                <app-avatar-picker class="avatar"
+                                   (ierror)="avatarError = $event" (iload)="onAvatarLoaded()" #avatar/>
+                <span class="error">{{ avatarError?.message }}</span>
+            </div>
+            <div class="gl--input-group name">
+                <span (click)="$any(name.nativeElement).focus()">Merchant′s name</span>
+                <app-input placeholder="Enter name..." formControlName="name" #name/>
+                @let nameControl = create.get("name");
+                <span class="error" *ngIf="!nameControl?.valid && nameControl?.touched">
+                    Must be between 2 and 25 characters length.
+                </span>
+            </div>
+            <div class="gl--input-group currency">
+                <span>Default currency</span>
+                <app-currency-select formControlName="sourceCurrency"/>
+            </div>
+            <div class="gl--input-group coins">
+                <span>Allowed coins</span>
+                <app-currency-select formControlName="availableCoins" mode="crypto" [multi]="true"/>
+            </div>
+            <div class="gl--input-group amount">
+                @let sourceCurrency = create.get("sourceCurrency")?.value;
+                @let shortName = sourceCurrency?.shortName | uppercase;
+                @let min = pow(10, -1 * (sourceCurrency?.decimals || 0));
+                <span (click)="$any(am.nativeElement).focus()">Amount to be paid</span>
+                <div class="input-row">
+                    <app-input formControlName="amount" type="number" [min]="min" [step]="min"
+                               placeholder="Enter amount..." #am/>
+                    <span>{{ shortName }}</span>
+                </div>
+                @let amountControl = create.get('amount');
+                <span class="error" *ngIf="!amountControl?.valid && amountControl?.touched">
+                    Amount must be between {{ min | number: '1.0-8' }} and 1e10 {{ shortName }}.
+                </span>
+            </div>
+            <div class="gl--input-group">
+                <span (click)="$any(lifetime.nativeElement).focus()">Lifetime</span>
+                <div class="input-row">
+                    <app-input formControlName="lifetime" type="number" [min]="1" [max]="12 * 60"
+                               [step]="1" placeholder="Enter lifetime..." #lifetime/>
+                    <span>minutes</span>
+                </div>
+                <span class="error" *ngIf="!create.get('lifetime')?.valid">Must be between 1min and 12h.</span>
+            </div>
+            <div class="gl--input-group">
+                <span (click)="$any(purpose.nativeElement).focus()">Purpose</span>
+                <div class="input-row">
+                    <app-input formControlName="purpose" maxlength="100"
+                               [step]="1" placeholder="Enter payment purpose..." #purpose/>
+                </div>
+                <span class="error" *ngIf="!create.get('purpose')?.valid">Must be up to 100 characters length.</span>
+            </div>
+
+            <span class="error" *ngIf="tooManyError">
+                Maximum number of pending invoices is 1000.
+                Maximum number of invoices opened per minute is 10.
+                Please try again later.
+            </span>
+
+            <button pRipple class="button" style="--p-ripple-background: rgba(255, 255, 255, .15)"
+                    [class.inactive]="!create.valid" [class.loading]="invoiceLoading"
+                    (click)="submitInvoice()">
+                <span class="loader"><span></span><span></span><span></span></span>
+                Submit
+            </button>
+        </form>
+    </div>
+</p-dialog>

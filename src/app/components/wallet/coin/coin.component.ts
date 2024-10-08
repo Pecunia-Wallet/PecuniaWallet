@@ -1,6 +1,6 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild} from "@angular/core";
+import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
-import {forkJoin, map, Observable, of, skip, take} from "rxjs";
+import {forkJoin, map, Observable, of, skip, Subject, take, takeUntil} from "rxjs";
 import {DatePipe, NgForOf, NgIf, NgOptimizedImage, SlicePipe} from "@angular/common";
 import {dp, server} from "../../../app.config";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
@@ -29,6 +29,7 @@ import {AuthService} from "../../../services/auth.service";
 import {HotToastService} from "@ngxpert/hot-toast";
 import {Ripple} from "primeng/ripple";
 import {Balance} from "wallet-sensitive/dist";
+import {AccountService} from "../../../services/account.service";
 
 @Component({
     selector: "app-coin",
@@ -49,7 +50,7 @@ import {Balance} from "wallet-sensitive/dist";
     templateUrl: "./coin.component.html",
     styleUrl: "./coin.component.scss"
 })
-export class CoinComponent implements OnInit {
+export class CoinComponent implements OnInit, OnDestroy {
 
     loading = true;
 
@@ -68,10 +69,13 @@ export class CoinComponent implements OnInit {
     currentTransactionPage = 0;
     transactionsRemaining = true;
 
+    private destroy$ = new Subject<void>();
+
     constructor(private currencyService: CurrencyService,
                 private wallet: WalletService,
                 private route: ActivatedRoute,
                 private router: Router,
+                private account: AccountService,
                 private identity: IdentityService,
                 private auth: AuthService,
                 private ref: ChangeDetectorRef,
@@ -89,7 +93,7 @@ export class CoinComponent implements OnInit {
 
     @HostListener("document:click", ["$event"])
     onClick(event: any) {
-        if (!this.more.nativeElement.contains(event.target)) {
+        if (!this.more.nativeElement?.contains(event.target)) {
             this.showDropdownMenu = false;
             this.more.nativeElement.classList.remove("hover");
         }
@@ -114,18 +118,19 @@ export class CoinComponent implements OnInit {
         }));
     }
 
-    ngOnInit() {
+    ngOnInit(first = true) {
         this.dropdownMenuItems = [
+            // TODO temporary disabled
+            // {
+            //     text: "Import keys",
+            //     icon: faPlus,
+            //     onClick: () =>
+            //         this.router.navigate(["wallet/coin/keys"], {
+            //             queryParamsHandling: "merge"
+            //         })
+            // },
             {
-                text: "Import keys",
-                icon: faPlus,
-                onClick: () =>
-                    this.router.navigate(["wallet/coin/keys"], {
-                        queryParamsHandling: "merge"
-                    })
-            },
-            {
-                text: "Export wallet",
+                text: "Export keys",
                 icon: faArrowUpFromBracket,
                 onClick: () =>
                     this.identity.proof().subscribe(proved => {
@@ -150,9 +155,7 @@ export class CoinComponent implements OnInit {
                 text: "Support",
                 icon: faHeadset,
                 onClick: () => {
-                    // TODO set link
-                    // this.auth.clear();
-                    // this.router.navigate(["/unlock"]);
+                    window.open("https://pecuniawallet.com/about/support", "_blank");
                 }
             },
             {
@@ -164,7 +167,8 @@ export class CoinComponent implements OnInit {
         ];
 
         const n = this.route.snapshot.queryParamMap.get("n");
-        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe((accountCurrency) => {
+
+        this.account.getAccountCurrency().pipe(take(1)).subscribe((accountCurrency) => {
             const coins = this.currencyService.getCoins();
             const coin = coins.find(coin => coin.shortName.toLowerCase() == n?.toLowerCase());
             if (!coin) throw new Error(`Bad coin param: ${n}`);
@@ -203,6 +207,37 @@ export class CoinComponent implements OnInit {
                 })
             });
         });
+
+        if (!first) return;
+        let coin = this.route.snapshot.queryParamMap.get("n");
+        this.route.queryParams
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(params => {
+                if (params["n"] !== coin) {
+                    coin = params["n"];
+                    this.loading = true;
+
+                    this.more = undefined as unknown as any;
+
+                    this.coin = undefined;
+                    this.fiat = undefined;
+                    this.balance = undefined as unknown as any;
+                    this.hasUnconfirmed = false;
+                    this.fiatBalance = undefined as unknown as any;
+                    this.showDropdownMenu = false;
+                    this.dropdownMenuItems = undefined as unknown as any;
+
+                    this.transactions = [];
+                    this.currentTransactionPage = 0;
+                    this.transactionsRemaining = true;
+                    this.ngOnInit(false);
+                }
+            });
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     toggleDropdown() {

@@ -42,7 +42,6 @@ export class WindowComponent {
 
     toWallet() {
         const lastWalletRouting = this.routeTracker.getLast("wallet");
-        console.log(lastWalletRouting);
         if (lastWalletRouting.route) {
             this.router.navigate([`/wallet/${lastWalletRouting.route}`], {
                 queryParamsHandling: "merge",

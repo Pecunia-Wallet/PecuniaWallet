@@ -29,6 +29,12 @@
     justify-content: center;
     gap: 15px;
     height: 240px;
+    width: 100%;
+
+    canvas {
+        max-height: 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 .statistics-container {

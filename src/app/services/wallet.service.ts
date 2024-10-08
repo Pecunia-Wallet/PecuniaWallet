@@ -2,7 +2,7 @@ import {forwardRef, Inject, Injectable, Injector} from "@angular/core";
 import {HttpBackend, HttpClient} from "@angular/common/http";
 import {server} from "../app.config";
 import {CurrencyService} from "./currency.service";
-import {catchError, Observable, of, skip, tap} from "rxjs";
+import {catchError, Observable, of, skip, Subject, tap} from "rxjs";
 import BigNumber from "bignumber.js";
 import {FetchService} from "./fetch.service";
 import {ActivatedRoute} from "@angular/router";
@@ -48,6 +48,7 @@ export class WalletService {
             this.currencyService = injector.get(CurrencyService);
             this.wallet.injectCurrencyService(this.currencyService);
         }, 10);
+
         // if (auth.auth$.value) this.wallet.readApiToken();
         // auth.auth$.subscribe(auth => {
         //     if (auth) this.wallet.readApiToken();

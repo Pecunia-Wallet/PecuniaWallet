@@ -1,8 +1,8 @@
 <div class="chart">
     <canvas baseChart type="doughnut" [data]="chartData" [options]="chartSettings"></canvas>
     <div class="statistics-container">
-        <div class="statistics" *ngIf="!loading && valueChange != undefined">
-            <div class="change" *ngVar="(Math.abs(valueChange || 0) | percent: '.0-1') == '0%' as neutral"
+        <div class="statistics" *ngIf="!loading && valueChange !== undefined">
+            <div class="change" *ngVar="(Math.abs(valueChange || 0) | percent: '.0-1') === '0%' as neutral"
                  [class.change--neutral]="neutral"
                  [class.change--positive]="!neutral && valueChange > 0"
                  [class.change--negative]="!neutral && valueChange < 0">

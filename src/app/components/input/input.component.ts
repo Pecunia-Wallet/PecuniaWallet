@@ -178,7 +178,6 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
 
         const min = (this.min || this.min == 0) && value.comparedTo(this.min)! <= 0 && !grow;
         const max = (this.max || this.max == 0) && value.comparedTo(this.max)! >= 0 && grow;
-        console.log(this.min, min, this.max, max)
         if (min || max) {
             this.stopChange();
             return;
@@ -190,7 +189,6 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
                 value.plus(step),
                 new BigNumber(this.max || +Infinity)
             );
-            console.log(newValue.toString())
         } else {
             newValue = BigNumber.max(
                 value.minus(step),
@@ -199,9 +197,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
         }
 
         if (newValue !== value) {
-            console.log(this.dp(this.step))
             this.value = newValue.toFixed(this.dp(this.step)).replace(",", ".");
-            console.log(this.value)
             this.inputed.emit(this.value);
         }
     }

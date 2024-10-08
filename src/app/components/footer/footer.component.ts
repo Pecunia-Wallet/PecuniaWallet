@@ -1,6 +1,5 @@
 import {Component, Input} from "@angular/core";
 import {NgIf} from "@angular/common";
-import {promo} from "../../app.config";
 
 @Component({
     selector: "app-footer",
@@ -16,5 +15,4 @@ export class FooterComponent {
     @Input() theme: "light" | "dark" = "light";
     @Input() underlineLinks = false;
 
-    protected readonly promo = promo;
 }

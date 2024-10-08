@@ -16,16 +16,24 @@
         <div class="address">
             <span class="address__name" [ngSwitch]="currentAddress?.type?.toLowerCase()">
                 <ng-container *ngSwitchCase="'pkh'">
-                    Legacy <span class="hint">(P2PKH)</span>
+                    @if (coin?.shortName === 'DOGE' || coin?.shortName === 'BCH') {
+                        Standard <span class="hint">(P2PKH)</span>
+                    } @else {
+                        Legacy <span class="hint">(P2PKH)</span>
+                    }
                 </ng-container>
                 <ng-container *ngSwitchCase="'wpkh'">
                     SegWit <span class="hint">(Native)</span>
                 </ng-container>
                 <ng-container *ngSwitchCase="'sh'">
-                    Legacy <span class="hint">(P2SH)</span>
+                    @if (coin?.shortName === 'DOGE' || coin?.shortName === 'BCH') {
+                        Multisig <span class="hint">(P2SH)</span>
+                    } @else {
+                        Legacy <span class="hint">(P2SH)</span>
+                    }
                 </ng-container>
                 <ng-container *ngSwitchCase="'wsh'">
-                    SegWit <span class="hint">(Nested)</span>
+                    SegWit <span class="hint">(Multisig)</span>
                 </ng-container>
             </span>
             <span class="address__value">{{ currentAddress?.value }}</span>

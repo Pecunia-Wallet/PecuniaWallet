@@ -1,0 +1,16 @@
+<input type="file" [accept]="webImageTypes.join(', ')" (input)="onInput()" #input>
+<div class="wrapper" [class.loading]="loading" [class.dragging]="drag"
+     (drop)="onDrop($event)" (dragover)="onDrag($event)" (dragenter)="onDrag($event)"
+     (dragend)="onDragged($event)" (dragleave)="onDragged($event)"
+     (click)="!loading ? input.click() : null" #wrapper>
+
+    <span class="overlay" #overlay>
+        <fa-icon [icon]="faImage" />
+    </span>
+
+    <app-avatar class="image" #avatar/>
+
+    <button *ngIf="!loading">
+        <fa-icon [icon]="faPencil" />
+    </button>
+</div>

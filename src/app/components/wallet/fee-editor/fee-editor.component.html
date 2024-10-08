@@ -2,7 +2,7 @@
 
 <app-wallet-header title="Edit fee" [link]="link"/>
 
-<div class="content">
+<div class="content" [style]="coin.shortName === 'BCH' ? 'justify-content: space-between; height: 75%;' : ''">
     <div class="sliders">
         <div class="slider-group" *ngIf="_rawSliderOptions">
             <div class="slider-group__title">
@@ -20,22 +20,26 @@
                         [(value)]="feePerKb" (userChangeEnd)="setBlocksFromFee()" />
         </div>
         <div class="slider-group" *ngIf="_blocksSliderOptions">
-            <span class="slider-group__title">Blocks:</span>
-            <ngx-slider [options]="_blocksSliderOptions"
-                        [(value)]="blocks" (userChangeEnd)="setFeeFromBlocks()" />
+            @if (coin.shortName !== 'BCH') {
+                <span class="slider-group__title">Blocks:</span>
+                <ngx-slider [options]="_blocksSliderOptions"
+                            [(value)]="blocks" (userChangeEnd)="setFeeFromBlocks()" />
+            }
         </div>
     </div>
-    <div class="input-group" *ngIf="feeUnits">
-        <app-input type="number" [min]="0" [placeholder]="feeUnits.text" [disabled]="loading"
-                   [step]="feeUnits.step" [(ngModel)]="feeInUnits" />
-        <button class="button button--side" [class.inactive]="loading"
-                (click)="applyFee()">Apply</button>
-    </div>
-    <div class="checkbox-group" *ngIf="askSubtraction">
-        <app-checkbox class="checkbox" [(ngModel)]="recipientsPayFees" [disabled]="loading" #checkbox />
-        <label (click)="loading ? null : recipientsPayFees = !recipientsPayFees">
-            Subtract fee from amount
-        </label>
+    <div class="center-group">
+        <div class="input-group" *ngIf="feeUnits">
+            <app-input type="number" [min]="0" [placeholder]="feeUnits.text" [disabled]="loading"
+                       [step]="feeUnits.step" [(ngModel)]="feeInUnits" />
+            <button class="button button--side" [class.inactive]="loading"
+                    (click)="applyFee()">Apply</button>
+        </div>
+        <div class="checkbox-group" *ngIf="askSubtraction">
+            <app-checkbox class="checkbox" [(ngModel)]="recipientsPayFees" [disabled]="loading" #checkbox />
+            <label (click)="loading ? null : recipientsPayFees = !recipientsPayFees">
+                Subtract fee from amount
+            </label>
+        </div>
     </div>
     <button class="button confirm-button" (click)="confirm()"
             [class.loading]="loading" [class.inactive]="loading"

@@ -1,0 +1,112 @@
+@use "../../../../styles" as *;
+@use "../../../../variables" as *;
+
+:host {
+    display: block;
+    width: 86px;
+    height: 86px;
+    position: relative;
+
+    &::before {
+        content: "You can upload a merchant avatar up to 5 MB (images only)";
+        position: absolute;
+        display: flex;
+        align-items: center;
+        width: 98px;
+        left: calc(100% + 15px);
+        text-align: justify;
+        height: 100%;
+        font-size: 10px;
+        font-weight: 300;
+        line-height: 20px;
+    }
+}
+
+.wrapper {
+    width: 86px;
+    height: 86px;
+    position: relative;
+
+    &:not(.loading), &:not(.loading) button {
+        cursor: pointer;
+    }
+}
+
+input {
+    display: none;
+}
+
+.image {
+    border: 1px solid fade-out($blue-darker, .95);
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    transition: opacity .15s ease-in-out;
+}
+
+.wrapper.loading .image {
+    position: relative;
+
+    &::before {
+        @include shine();
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 3;
+        border-radius: 50%;
+    }
+}
+
+.wrapper.dragging .overlay {
+    opacity: 1;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: fade-out(#fff, .1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    z-index: 1;
+    transition: opacity .07s ease-in-out;
+    opacity: 0;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(2px);
+        z-index: -1;
+    }
+
+    fa-icon {
+        color: #9597a54a;
+        font-size: 30px;
+    }
+}
+
+button {
+    position: absolute;
+    right: 0;
+    top: 5px;
+    z-index: 4;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f3f8;
+
+    fa-icon {
+        font-size: 10px;
+        color: fade-out($blue-darker, .3);
+    }
+}

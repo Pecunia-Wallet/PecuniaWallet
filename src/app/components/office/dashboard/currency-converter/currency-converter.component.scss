@@ -1,0 +1,61 @@
+@use "../../../../../variables" as *;
+
+:host {
+    display: block;
+    height: 100%;
+    max-height: 105px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+}
+
+.row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+//.column {
+//    display: flex;
+//    flex-direction: column;
+//    justify-content: space-between;
+//    width: 100%;
+//}
+
+.input-amount {
+    width: 100%;
+}
+
+.select {
+    width: fit-content;
+    min-width: 115px;
+    position: relative;
+
+    button {
+        position: absolute;
+        bottom: -17px;
+        z-index: 3;
+        left: 0;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        margin: auto;
+        transform: rotate(90deg);
+        color: #d5d5db;
+        font-size: 13px;
+        border: none;
+        background: none;
+        border-radius: 50%;
+        transition: background .15s ease-in-out, color .15s ease-in-out;
+        cursor: pointer;
+
+        &:hover {
+            background: fade-out($blue-darker, .95);
+            color: $blue-darker;
+        }
+    }
+}

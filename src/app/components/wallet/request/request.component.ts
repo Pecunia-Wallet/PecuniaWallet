@@ -132,7 +132,7 @@ export class RequestComponent implements OnInit, AfterViewInit {
 
     get request() {
         if (!this.addr || !this.amount) return undefined;
-        let request = `bitcoin:${this.addr}?amount=${this.amount.dp(this.coin.decimals)}`;
+        let request = `${this.coin.uriPrefix}${this.addr}?amount=${this.amount.dp(this.coin.decimals)}`;
         if (this.label) request += `&label=${this.label}`;
         if (this.message) request += `&message=${this.message}`;
         return request;

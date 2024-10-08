@@ -1,0 +1,113 @@
+<div class="header">
+    @let compact = document.body.offsetWidth <= 1000;
+    <form class="settings" [formGroup]="settings" *ngIf="!compact">
+        <h1>Show statistics</h1>
+        <ng-container>
+            <div class="select-group">
+                <span>per</span>
+                <p-select formControlName="period" [options]="periods" optionLabel="name"/>
+            </div>
+            <div class="select-group">
+                <span>in</span>
+                <app-currency-select formControlName="currency"/>
+            </div>
+        </ng-container>
+    </form>
+
+    <div class="account" [class.loading]="!name">
+        <app-avatar class="avatar"/>
+        <span class="name">{{ name }}</span>
+    </div>
+
+    <button *ngIf="compact" (click)="showSettingsDialog = true" pRipple>
+        <fa-icon [icon]="faSliders" />
+    </button>
+</div>
+
+<p-dialog class="modal" [draggable]="false" [resizable]="false" [(visible)]="showSettingsDialog"
+          header="Options" [modal]="true" [style]="{width: '90vw', maxWidth: '500px'}">
+    <form class="settings modal" [formGroup]="settings">
+        <ng-container>
+            <div class="select-group">
+                <span>period</span>
+                <p-select class="select" formControlName="period" [options]="periods" optionLabel="name" appendTo="body"/>
+            </div>
+            <div class="select-group">
+                <span>currency</span>
+                <app-currency-select class="select" formControlName="currency" appendTo="body"/>
+            </div>
+        </ng-container>
+        <button (click)="showSettingsDialog = false" pRipple class="button">Confirm</button>
+    </form>
+</p-dialog>
+
+<div class="statistics" [style.overflow-y]="!_window.isMobile() ? 'auto' : 'unset'">
+    <div class="row">
+        <app-currency-converter class="converter" [id]="uid"/>
+
+        <div class="sum">
+            <div class="chart--doughnut">
+                <div class="v-loader" [class.visible]="!totalOperationSum">
+                    <span></span><span></span><span></span>
+                </div>
+                <canvas baseChart type="doughnut" [data]="operationSumChartData" [options]="doughnutSettings"></canvas>
+            </div>
+            <div class="info">
+                <h2>Operation sum</h2>
+                <div class="select-group">
+                    <span>type</span>
+                    <p-select class="select" [formControl]="operationSumType" [options]="operationSumTypes"/>
+                </div>
+                @let currency = settings.get("currency")!.value!;
+                <span [class.loading]="!totalOperationSum">
+                    <span *ngIf="!isCrypto(currency)">{{ currency.symbol }}</span>
+                    {{
+                        totalOperationSum ? dp(totalOperationSum, currency.decimals) : null
+                    }}
+                    <span *ngIf="isCrypto(currency)"> {{ currency.shortName }}</span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="aggregate">
+            <form class="checkbox-groups" [formGroup]="aggregateCharts">
+                <div class="checkbox-group">
+                    <p-checkbox formControlName="amount" [binary]="true" inputId="amount"/>
+                    <label for="amount">Received amount</label>
+                </div>
+                <div class="checkbox-group">
+                    <p-checkbox formControlName="count" [binary]="true" inputId="count"/>
+                    <label for="count">Number of invoices</label>
+                </div>
+            </form>
+            <div class="chart--aggregate-wrapper">
+                <canvas class="chart--aggregate" baseChart type="line"
+                        [data]="aggregateChartData" [options]="lineSettings" [plugins]="linePlugins"></canvas>
+            </div>
+        </div>
+        <div class="count">
+            <h3>Invoices</h3>
+            <div class="count__row">
+                <span>open</span>
+                <span>{{ invoiceCount?.open ?? 0 }}</span>
+            </div>
+            <div class="count__row">
+                <span>compl</span>
+                <span>{{ invoiceCount?.completed ?? 0 }}</span>
+            </div>
+            <div class="count__row">
+                <span>failed</span>
+                <span>{{ invoiceCount?.failed ?? 0 }}</span>
+            </div>
+            <div class="count__row">
+                <span>total</span>
+                <span>{{ invoiceCount?.total ?? 0 }}</span>
+            </div>
+            <div class="count__row" *ngIf="invoiceCount?.total">
+                <span>ratio</span>
+                <span>{{ ((invoiceCount?.completed ?? 0) / (invoiceCount?.total ?? 1) * 100).toFixed(2) }}%</span>
+            </div>
+        </div>
+    </div>
+</div>

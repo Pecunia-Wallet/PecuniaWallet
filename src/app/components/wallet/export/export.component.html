@@ -1,0 +1,53 @@
+<app-wallet-header title="Export wallet"/>
+
+<div class="masters">
+    <span>
+        Master public&nbsp;&nbsp;(xPub)
+        <button class="copy" (click)="copy($any(export!).masterPublic, 'xpub')">
+            <fa-icon [icon]="faCopy"/>
+        </button>
+    </span>
+    <span>
+        Master private (xPrv)
+        <button class="copy" (click)="copy($any(export!).masterPrivate, 'xrv')">
+            <fa-icon [icon]="faCopy"/>
+        </button>
+    </span>
+</div>
+
+<p-confirm-popup #cp>
+    <ng-template #headless let-message>
+        <div class="popup">
+            <div class="popup__message">
+                <fa-icon [icon]="faWarning"/>
+                <p>Are you sure want to detach the key?</p>
+            </div>
+            <div class="popup__options">
+                <button class="primary" (click)="cp.onAccept()">Delete</button>
+                <button (click)="cp.onReject()">Cancel</button>
+            </div>
+        </div>
+    </ng-template>
+</p-confirm-popup>
+
+<div class="keys">
+    @for (key of export?.keys; track key) {
+        <div class="key">
+            <div class="key__secret">
+                <span class="key__value" (click)="copy(key.value, 'keyValue')">
+                    {{ key.show ? key.value : censorKey(key.value) }}
+                </span>
+                <button class="key__eye" (click)="key.show = !key.show">
+                    <fa-icon [icon]="key.show ? faEye : faEyeSlash"/>
+                </button>
+            </div>
+            <span class="key__balance">
+                {{ key.balance }} {{ coin?.shortName | uppercase }}
+            </span>
+        </div>
+    }
+</div>
+
+<span class="placeholder" *ngIf="!export?.keys?.length">
+    {{ !export?.keys ? "Loading..." : "There are no keys with balance found." }}
+</span>

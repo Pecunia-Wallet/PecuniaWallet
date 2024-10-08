@@ -43,10 +43,6 @@ export class LockComponent extends CodeComponent {
         return false;
     }
 
-    override showPromo(): boolean {
-        return false;
-    }
-
     override header(): SafeHtml {
         return this.sanitizer.bypassSecurityTrustHtml(
             `<h1 ${this.getContentAttr()}>Set a PIN</h1>

@@ -1,0 +1,17 @@
+:host {
+    display: block;
+}
+
+.select {
+    width: 100%;
+}
+
+.currency {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    span {
+        font-weight: 500;
+    }
+}

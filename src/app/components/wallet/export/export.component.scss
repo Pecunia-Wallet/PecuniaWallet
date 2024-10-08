@@ -1,0 +1,150 @@
+@use "../layout";
+@use "variables" as *;
+
+:host * {
+    font-family: "Ubuntu Mono", monospace;
+}
+
+.masters {
+    margin: 40px 15px 65px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 18px;
+    font-weight: 700;
+    position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: -30px;
+        max-width: 320px;
+        width: 150%;
+        height: 1px;
+        background: $blue-darker;
+        opacity: .05;
+        left: -25%;
+    }
+}
+
+.keys {
+    width: 100%;
+    overflow: auto;
+}
+
+.key {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px;
+    border: 1px solid fade-out($blue-darker, .95);
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto 20px;
+    position: relative;
+
+    &__value {
+        display: block;
+        font-size: 14px;
+        max-width: 205px;
+        word-break: break-all;
+        font-weight: 700;
+        letter-spacing: 0.05rem;
+        cursor: pointer;
+    }
+
+    &__secret {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    &__eye fa-icon {
+        display: inline-block;
+        min-width: 15px;
+        font-size: 12px;
+    }
+
+    &__balance {
+        font-size: 18px;
+        font-weight: 700;
+        margin-left: 25px;
+        white-space: nowrap;
+    }
+
+    &__detach {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid fade-out($red-light, .9);
+        background: #fff;
+        border-radius: 18px;
+        color: fade-out($red-light, .5);
+        font-size: 14px;
+        transition: color .1s ease-in-out, border .1s ease-in-out, background .1s ease-in-out;
+
+        &:hover {
+            color: fade-out($red-light, .15);
+            border: 1px solid fade-out($red-light, .65);
+            background: fade-out($red-light, .95);
+        }
+    }
+}
+
+.popup {
+    padding: 20px 20px 10px;
+
+    &__message {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 500;
+
+        fa-icon {
+            color: $red-light;
+        }
+    }
+
+    &__options {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+        gap: 15px;
+
+        button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: fade-out($blue-darker, .65);
+            transition: background .15s ease-in-out, color .15s ease-in-out;
+
+            &:hover {
+                background: fade-out($blue-darker, .85);
+                color: fade-out($blue-darker, .5);
+            }
+
+            &.primary {
+                opacity: 1;
+                background: $red-light;
+                color: #fff;
+
+                &:hover {
+                    background: #c73434;
+                }
+            }
+        }
+    }
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $blue-darker;
+    opacity: .75;
+}

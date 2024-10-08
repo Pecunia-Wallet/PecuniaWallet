@@ -6,7 +6,7 @@ import {BehaviorSubject} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {FooterComponent} from "../footer/footer.component";
 import {MarqueeComponent} from "../marquee/marquee.component";
-import {promo, server} from "../../app.config";
+import {server} from "../../app.config";
 import {AuthService} from "../../services/auth.service";
 
 export interface FuncButton {
@@ -98,10 +98,6 @@ export abstract class CodeComponent implements OnInit {
         return true;
     }
 
-    showPromo(): boolean {
-        return true;
-    }
-
     get codeLength(): number {
         return CodeComponent.CODE_LENGTH;
     }
@@ -188,5 +184,4 @@ export abstract class CodeComponent implements OnInit {
 
     protected readonly server = server;
     protected readonly setTimeout = setTimeout;
-    protected readonly promo = promo;
 }

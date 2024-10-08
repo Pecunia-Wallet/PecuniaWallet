@@ -34,6 +34,7 @@ import {BrokerService} from "../../../services/broker.service";
 import {WindowComponent} from "../../window/window.component";
 import {TransactionOutputs, WalletService} from "../../../services/wallet.service";
 import {Currency} from "../../../models/Currency";
+import {AccountService} from "../../../services/account.service";
 
 interface Recipient {
     form: FormGroup;
@@ -105,6 +106,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
                 private route: ActivatedRoute,
                 private router: Router,
                 private currencyService: CurrencyService,
+                private account: AccountService,
                 private broker: BrokerService,
                 private wallet: WalletService,
                 protected _window: WindowComponent) {}
@@ -144,7 +146,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
 
     ngOnInit() {
         this.coin = this.wallet.currentCoin(this.route)!;
-        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(async (currency) => {
+        this.account.getAccountCurrency().pipe(take(1)).subscribe(async (currency) => {
                 const callback = () => {
                     this.currency = currency;
 

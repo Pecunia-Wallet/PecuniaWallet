@@ -18,6 +18,7 @@ import {BundleService} from "../../../services/bundle.service";
 import {bindAmountChanges} from "../send-step-recipients/send-step-recipients.component";
 import {Ripple} from "primeng/ripple";
 import {AddressBag} from "wallet-sensitive/dist";
+import {AccountService} from "../../../services/account.service";
 
 @Component({
     selector: "app-request-builder",
@@ -62,6 +63,7 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
 
     constructor(private currencyService: CurrencyService,
                 private wallet: WalletService,
+                private account: AccountService,
                 private route: ActivatedRoute,
                 private router: Router,
                 private bundle: BundleService) {
@@ -99,7 +101,7 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(currency => {
+        this.account.getAccountCurrency().pipe(take(1)).subscribe(currency => {
             this.coin = this.wallet.currentCoin(this.route)!;
             this.currency = currency;
 
@@ -109,6 +111,12 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
                     break;
                 case "ltc":
                     this.coinPlaceholder = "2 LTC";
+                    break;
+                case "bch":
+                    this.coinPlaceholder = "0.3 BCH";
+                    break;
+                case "doge":
+                    this.coinPlaceholder = "1500 DOGE";
             }
             switch (currency.shortName.toLowerCase()) {
                 case "eur": // fall through

@@ -51,10 +51,6 @@ export class IdentityComponent extends CodeComponent {
         return false;
     }
 
-    override showPromo(): boolean {
-        return false;
-    }
-
     override header(): SafeHtml {
         return this.sanitizer.bypassSecurityTrustHtml(
             `<h1 ${this.getContentAttr()}>Enter Your PIN</h1>

@@ -13,6 +13,7 @@ import {CurrencyService} from "../../../services/currency.service";
 import {Coin} from "../../../models/Coin";
 import {FiatCurrency} from "../../../models/FiatCurrency";
 import {NgVarDirective} from "../../../directives/ng-var.directive";
+import {AccountService} from "../../../services/account.service";
 
 @Component({
     selector: "app-overview",
@@ -60,6 +61,7 @@ export class OverviewComponent implements OnInit {
 
     constructor(private wallet: WalletService,
                 private currencyService: CurrencyService,
+                private account: AccountService,
                 private http: HttpClient) {
     }
 
@@ -85,7 +87,7 @@ export class OverviewComponent implements OnInit {
                     c.coin.shortName.toLowerCase() == coins[i].shortName.toLowerCase());
                 if (!change) throw new Error("Unknown error");
                 return [balance.multipliedBy(change.openPrice), balance.multipliedBy(change.lastPrice)];
-            }).reduce(([a1, b1], [a2, b2]) => [a1.plus(b1), a2.plus(b2)]);
+            }).reduce(([a1, b1], [a2, b2]) => [a1.plus(a2), b1.plus(b2)]);
             return lastPrice.minus(openPrice).div(openPrice).dp(3, BigNumber.ROUND_HALF_UP).toNumber();
         }))
     }
@@ -124,7 +126,7 @@ export class OverviewComponent implements OnInit {
 
     ngOnInit() {
         const start = new Date().getTime();
-        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(async (accountCurrency) => {
+        this.account.getAccountCurrency().pipe(take(1)).subscribe(async (accountCurrency) => {
             this.coins = this.currencyService.getCoins();
             this.accountCurrency = accountCurrency;
 

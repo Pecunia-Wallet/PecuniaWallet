@@ -14,6 +14,7 @@ import {faArrowLeft, faArrowRight} from "@fortawesome/free-solid-svg-icons";
 import {dp, getCoinName, testnet} from "../../../app.config";
 import {BundleService} from "../../../services/bundle.service";
 import {BrokerService} from "../../../services/broker.service";
+import {CurrencyService} from "../../../services/currency.service";
 
 interface UriParseError {
     malformed?: true;
@@ -59,7 +60,8 @@ export class RequestReaderComponent implements OnInit {
                 private route: ActivatedRoute,
                 private bundle: BundleService,
                 private router: Router,
-                private broker: BrokerService) {
+                private broker: BrokerService,
+                private currencyService: CurrencyService) {
     }
 
     get uid() {
@@ -98,12 +100,13 @@ export class RequestReaderComponent implements OnInit {
     parseBitcoinUri(uri: string): UriParseResult & UriParseError {
         const regex = /^([a-zA-Z]+):([a-zA-Z0-9]*)([;?]|$)/;
         const match = uri.match(regex);
-        let error: UriParseError = {};
+        const error: UriParseError = {};
 
         if (!match) return {malformed: true};
 
         const network = match[1];
-        if (network !== "bitcoin") error["invalidNetwork"] = true;
+        if (network in this.currencyService.getCoins().map(c => c.uriPrefix))
+            error["invalidNetwork"] = true;
 
         const address = match[2];
 
@@ -139,6 +142,7 @@ export class RequestReaderComponent implements OnInit {
             try {
                 amount = this.parseAmount(amount) as any;
             } catch (_) {
+                /* Empty */
             }
             if (!amount || !(amount as any instanceof BigNumber)) error["invalidAmount"] = true;
         }

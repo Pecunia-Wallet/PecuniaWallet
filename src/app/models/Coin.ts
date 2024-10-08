@@ -8,5 +8,6 @@ export interface Coin {
     color: string;
     requiredConfirmations: number;
     explorer: string;
+    uriPrefix: string;
     defaultAddressType?: string;
 }

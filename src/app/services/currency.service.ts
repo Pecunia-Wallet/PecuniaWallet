@@ -10,6 +10,7 @@ import {FiatCurrency} from "../models/FiatCurrency";
 import {Rate} from "../models/Rate";
 import {Coin} from "../models/Coin";
 import {Currency} from "../models/Currency";
+import {AccountService} from "./account.service";
 
 @Injectable({
     providedIn: "root"
@@ -20,17 +21,11 @@ export class CurrencyService {
     coins$ = new BehaviorSubject<Array<Coin>>([]);
     rates$ = new BehaviorSubject<Array<Rate>>([]);
     protected lastRatesUpdate: Date;
-    accountCurrency$ = new BehaviorSubject<FiatCurrency>(null as any);
-    protected lastAccountCurrencyUpdate: Date;
 
     constructor(private http: HttpClient,
-                private auth: AuthService,
                 private fetcher: FetchService) {
         setInterval(() => this.renewRates(), 1000 * 60 * 2);
         this.renewRates();
-        this.auth.auth$.pipe(filter(auth => auth), first()).subscribe(_ => {
-            this.getAccountCurrency().subscribe();
-        });
     }
 
     public getFiatCurrencies(): Array<FiatCurrency> {
@@ -61,18 +56,19 @@ export class CurrencyService {
 
     public getCoins(): Array<Coin> {
         return [
-            // {
-            //     "shortName": "BTC",
-            //     "fullName": "Bitcoin",
-            //     "decimals": 8,
-            //     "imageUri": "/images/btc.svg",
-            //     "symbol": "₿",
-            //     "color": "#f7931a",
-            //     "defaultAddressType": "wpkh",
-            //     "requiredConfirmations": 3,
-            //     "unitName": "sat",
-            //     "explorer": "https://mempool.space/tx/"
-            // },
+            {
+                "shortName": "BTC",
+                "fullName": "Bitcoin",
+                "decimals": 8,
+                "imageUri": "/images/btc.svg",
+                "symbol": "₿",
+                "color": "#f7931a",
+                "defaultAddressType": "wpkh",
+                "requiredConfirmations": 3,
+                "unitName": "sat",
+                "uriPrefix": "bitcoin:",
+                "explorer": "https://mempool.space/tx/"
+            },
             {
                 "shortName": "LTC",
                 "fullName": "Litecoin",
@@ -83,7 +79,34 @@ export class CurrencyService {
                 "defaultAddressType": "wpkh",
                 "requiredConfirmations": 6,
                 "unitName": "lit",
+                "uriPrefix": "litecoin:",
                 "explorer": "https://blockchair.com/litecoin/transaction/"
+            },
+            {
+                "shortName": "DOGE",
+                "fullName": "Dogecoin",
+                "decimals": 8,
+                "imageUri": "/images/doge-simple.svg",
+                "symbol": "Ð",
+                "color": "#c2a633",
+                "defaultAddressType": "pkh",
+                "requiredConfirmations": 10,
+                "unitName": "koinu",
+                "uriPrefix": "dogecoin:",
+                "explorer": "https://blockchair.com/dogecoin/transaction/"
+            },
+            {
+                "shortName": "BCH",
+                "fullName": "Bitcoin Cash",
+                "decimals": 8,
+                "imageUri": "/images/bch.svg",
+                "symbol": "Ƀ",
+                "color": "#0AC18E",
+                "defaultAddressType": "pkh",
+                "requiredConfirmations": 3,
+                "unitName": "sat",
+                "uriPrefix": "",
+                "explorer": "https://blockchair.com/bitcoin-cash/transaction/"
             }
         ];
     }
@@ -195,33 +218,6 @@ export class CurrencyService {
             }
 
             throw new Error("Runtime error: Conversion rate not found.");
-        }));
-    }
-
-    public getAccountCurrency(): Observable<FiatCurrency> {
-        return this.fetcher.fetch({
-            subject: this.accountCurrency$,
-            when: () => minutesDifference(this.lastAccountCurrencyUpdate, new Date()) > 5,
-            parse: name => {
-                const fiats = this.getFiatCurrencies();
-                const currency = fiats.find(f => f.shortName == name);
-                this.lastAccountCurrencyUpdate = new Date()
-                return currency || fiats[0];
-            },
-            renew: {
-                url: `${server}/account/currency`,
-                sendCredentials: true,
-                raw: true,
-                retry: 3
-            }
-        })
-    }
-
-    public setAccountCurrency(currency: FiatCurrency): Observable<void> {
-        this.accountCurrency$.next(currency);
-        return this.http.post(`${server}/account/currency`, currency.shortName, {
-            withCredentials: true
-        }).pipe(map(() => {
         }));
     }
 

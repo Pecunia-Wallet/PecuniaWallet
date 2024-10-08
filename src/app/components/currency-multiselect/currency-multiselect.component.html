@@ -1,0 +1,33 @@
+@if (multi) {
+    <p-multi-select class="select" [appendTo]="appendTo"
+                    [class.ng-valid]="hasClass('ng-valid')"
+                    [class.ng-invalid]="hasClass('ng-invalid')"
+                    [class.ng-touched]="hasClass('ng-touched')"
+                    [class.ng-dirty]="hasClass('ng-dirty')"
+                    [options]="currencies" [showHeader]="false"
+                    optionLabel="shortName" display="comma"
+                    [placeholder]="placeholder || 'Select currencies'" #select>
+        <ng-template let-currency #item>
+            <div class="currency">
+                <img [ngSrc]="server + currency.imageUri" width="20" height="20">
+                <span>{{ currency.fullName }}</span>
+            </div>
+        </ng-template>
+    </p-multi-select>
+} @else {
+    <p-select class="select" [appendTo]="appendTo"
+              [class.ng-valid]="hasClass('ng-valid')"
+              [class.ng-invalid]="hasClass('ng-invalid')"
+              [class.ng-touched]="hasClass('ng-touched')"
+              [class.ng-dirty]="hasClass('ng-dirty')"
+              [options]="currencies" optionLabel="shortName"
+              [placeholder]="placeholder || 'Select currency'" #select>
+        <ng-template let-currency #item>
+            <div class="currency">
+                <img [ngSrc]="server + currency.imageUri" width="20" height="20">
+                <span>{{ currency.fullName }}</span>
+            </div>
+        </ng-template>
+    </p-select>
+}
+

@@ -28,8 +28,6 @@ class FeeUnits extends DropdownItem {
     step: number;
 }
 
-// FIXME isn't restoring after send error
-
 const generateBitcoinLikeUnits = (coin: Coin) => [
     {
         text: `${coin.unitName.toLowerCase()}/vByte`, step: .01,
@@ -38,7 +36,9 @@ const generateBitcoinLikeUnits = (coin: Coin) => [
     },
     {
         text: `${coin.unitName.toLowerCase()}/vKbyte`, step: 100,
-        to: (r: BigNumber) => dp(r.times(1e8), 0),
+        to: (r: BigNumber) => {
+            return dp(r.times(1e8), 0)
+        },
         from: (v: string) => new BigNumber(v).div(1e8)
     },
     {
@@ -78,13 +78,21 @@ export abstract class FeeEditorComponent implements OnInit, AfterViewInit, OnDes
 
     readonly bitcoinMinFee: number = 0.00001;
     readonly bitcoinMaxFee: number = 0.001;
-    readonly bitcoinDefaultFee: number = 0.0003;
+    readonly bitcoinDefaultFee: number = 0.0001;
     readonly litecoinMinFee: number = 0.00001;
-    readonly litecoinMaxFee: number = 0.001;
-    readonly litecoinDefaultFee: number = 0.0003;
+    readonly litecoinMaxFee: number = 0.0005;
+    readonly litecoinDefaultFee: number = 0.0001;
+    readonly dogecoinMinFee: number = 0.001;
+    readonly dogecoinMaxFee: number = 0.1;
+    readonly dogecoinDefaultFee: number = 0.01;
+    readonly bitcoinCashMinFee: number = 0.000001;
+    readonly bitcoinCashMaxFee: number = 0.001;
+    readonly bitcoinCashDefaultFee: number = 0.00001000;
 
     bitcoinFeeUnits: FeeUnits[];
     litecoinFeeUnits: FeeUnits[];
+    dogecoinFeeUnits: FeeUnits[];
+    bitcoinCashFeeUnits: FeeUnits[];
 
     @ViewChild("checkbox") checkbox: CheckboxComponent;
 
@@ -117,11 +125,20 @@ export abstract class FeeEditorComponent implements OnInit, AfterViewInit, OnDes
                           protected id: IdentityService) {
         const bitcoin = currencyService.findCoinByShortName("BTC");
         const litecoin = currencyService.findCoinByShortName("LTC");
+        const dogecoin = currencyService.findCoinByShortName("DOGE");
+        const bitcoinCash = currencyService.findCoinByShortName("BCH");
+
         if (bitcoin) {
             this.bitcoinFeeUnits = generateBitcoinLikeUnits(bitcoin);
         }
         if (litecoin) {
             this.litecoinFeeUnits = generateBitcoinLikeUnits(litecoin);
+        }
+        if (dogecoin) {
+            this.dogecoinFeeUnits = generateBitcoinLikeUnits(dogecoin);
+        }
+        if (bitcoinCash) {
+            this.bitcoinCashFeeUnits = generateBitcoinLikeUnits(bitcoinCash);
         }
     }
 
@@ -145,6 +162,12 @@ export abstract class FeeEditorComponent implements OnInit, AfterViewInit, OnDes
                 break;
             case "ltc":
                 this.availableFeeUnits = this.litecoinFeeUnits;
+                break;
+            case "doge":
+                this.availableFeeUnits = this.dogecoinFeeUnits;
+                break;
+            case "bch":
+                this.availableFeeUnits = this.bitcoinCashFeeUnits;
                 break;
         }
     }
@@ -193,6 +216,18 @@ export abstract class FeeEditorComponent implements OnInit, AfterViewInit, OnDes
                     this.feePerKb = Math.min(this.litecoinDefaultFee,
                         est[Math.ceil(est.length / 2)].feeRate.toNumber());
                     break;
+                case "doge":
+                    this.minFee = this.dogecoinMinFee;
+                    this.maxFee = this.dogecoinMaxFee;
+                    this.feePerKb = Math.min(this.dogecoinDefaultFee,
+                        est[Math.ceil(est.length / 2)].feeRate.toNumber());
+                    break;
+                case "bch":
+                    this.minFee = this.bitcoinCashMinFee;
+                    this.maxFee = this.bitcoinCashMaxFee;
+                    this.feePerKb = Math.min(this.bitcoinCashDefaultFee,
+                        est[0].feeRate.toNumber());
+                    break;
             }
             this.restoreState();
 
@@ -240,7 +275,9 @@ export abstract class FeeEditorComponent implements OnInit, AfterViewInit, OnDes
         return {
             floor: this.minFee,
             ceil: this.maxFee,
-            translate: value => this.feeUnits.to(new BigNumber(value)),
+            translate: value => {
+                return this.feeUnits.to(new BigNumber(value))
+            },
             showSelectionBar: true,
             step: step,
             disabled: this.loading,

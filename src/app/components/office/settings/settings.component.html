@@ -1,0 +1,162 @@
+<form class="form" [formGroup]="form">
+    <p-accordion [(value)]="accordionSelection" (valueChange)="savePreferences()" [multiple]="true">
+        <p-accordion-panel value="Intro">
+            <p-accordion-header>Introduction</p-accordion-header>
+            <p-accordion-content>
+<!--                <p style="font-size: 14px; color: rgba(43,46,74,0.75)">-->
+<!--                </p>-->
+                <div class="misc" style="flex-direction: row;justify-content: center;flex-wrap: wrap">
+                    <button pRipple class="misc-button contact" (click)="toDocs()">
+                        API Docs
+                        <fa-icon [icon]="faFileLines"/>
+                    </button>
+                    <button pRipple class="misc-button contact" (click)="toSupport()">
+                        Contact Us
+<!--                        <fa-icon [icon]="faArrowUpRightFromSquare"/>-->
+                        <fa-icon [icon]="faHeadset"/>
+                    </button>
+                    <!--<button pRipple class="misc-button logout" (click)="auth.logout()">
+                        Log Out
+                        <fa-icon [icon]="faArrowRightFromBracket"/>
+                    </button>-->
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel><p-accordion-panel value="General">
+            <p-accordion-header>General</p-accordion-header>
+            <p-accordion-content>
+                <div class="avatar-form">
+                    <app-avatar-picker (ierror)="avatarError = $event" #avatarPicker/>
+                    <span class="error">{{ avatarError?.message }}</span>
+                </div>
+                <div class="gl--input-group name">
+                    @let nameControl = form.get('name');
+                    <span (click)="$any(nameInp.nativeElement).focus()">Merchant′s name</span>
+                    <app-input class="app-input" [placeholder]="settings?.id ?? 'Enter name...'"
+                               [formControl]="$any(nameControl)" #nameInp/>
+                    <span class="error" *ngIf="!nameControl?.valid && nameControl?.touched">
+                        Must be between 2 and 25 characters length.
+                    </span>
+                </div>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'email',
+                        span: 'Notification email',
+                        error: 'Must be a valid email.'
+                    }"/>
+                <div class="gl--input-group inaccuracy">
+                    @let inaccuracyControl = form.get('inaccuracyPercent');
+                    <span (click)="$any(inaccuracyInp.nativeElement).focus()">Inaccuracy value</span>
+                    <app-input class="app-input" type="number" suffix="%"
+                               [min]="0" [max]="99" [step]="0.01"
+                               placeholder="Enter percent..."
+                               [formControl]="$any(inaccuracyControl)" #inaccuracyInp/>
+                    <span class="error" *ngIf="!inaccuracyControl?.valid && inaccuracyControl?.touched">
+                        Must be between 0 and 99.
+                    </span>
+                </div>
+                <div class="gl--input-group inaccuracy-type">
+                    <span>Inaccuracy type</span>
+                    <p-select [formControl]="$any(form.get('inaccuracyType'))"
+                              [options]="INACCURACY_TYPES" appendTo="body" />
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+        <p-accordion-panel value="Secret">
+            <p-accordion-header>Secret</p-accordion-header>
+            <p-accordion-content>
+                <div class="gl--input-group token">
+                    <span>API Token</span>
+                    <div class="input-row">
+                        <span class="input">{{ wallet.getApiToken().pipe(take(1)) | async }}</span>
+                        <button pRipple (click)="copyApiToken()"><fa-icon [icon]="faCopy" /></button>
+                    </div>
+                </div>
+                <div class="switch-group">
+                        <span>
+                            Share private keys
+                            <!-- TODO Add link -->
+                            <fa-icon class="question" [icon]="faQuestionCircle"/>
+                        </span>
+                    <p-toggle-switch class="switch" [formControl]="$any(form.get('grantAccess'))"/>
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+        <p-accordion-panel value="Notifications">
+            <p-accordion-header>Notifications</p-accordion-header>
+            <p-accordion-content>
+                <div class="switch-group notify">
+                    <span>Invoice changes</span>
+                    <p-toggle-button [formControl]="$any(form.get('notifyOnChange'))"
+                                     onLabel="On" offLabel="Off" class="switch-button"/>
+                </div>
+                <div class="switch-group notify">
+                    <span>Invoice completes</span>
+                    <p-toggle-button [formControl]="$any(form.get('notifyOnSuccess'))"
+                                     onLabel="On" offLabel="Off" class="switch-button"/>
+                </div>
+                <div class="switch-group notify">
+                    <span>Invoice fails</span>
+                    <p-toggle-button [formControl]="$any(form.get('notifyOnFailure'))"
+                                     onLabel="On" offLabel="Off" class="switch-button"/>
+                </div>
+            </p-accordion-content>
+        </p-accordion-panel>
+        <p-accordion-panel value="Links">
+            <p-accordion-header style="">Links</p-accordion-header>
+            <p-accordion-content>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'URI',
+                        controlName: 'aboutUrl',
+                        span: 'About',
+                        error: 'Must be a valid URI.'
+                    }"/>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'URI',
+                        controlName: 'supportUrl',
+                        span: 'Support',
+                        error: 'Must be a valid URI.'
+                    }"/>
+            </p-accordion-content>
+        </p-accordion-panel>
+        <p-accordion-panel value="Callbacks">
+            <p-accordion-header>Callbacks</p-accordion-header>
+            <p-accordion-content>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'callback url',
+                        controlName: 'defaultCallbackUrl',
+                        span: 'Default',
+                        error: 'Must be a valid HTTP link.'
+                    }"/>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'callback url',
+                        controlName: 'successCallbackUrl',
+                        span: 'Success',
+                        error: 'Must be a valid HTTP link.'
+                    }"/>
+                <ng-container *ngTemplateOutlet="inputGroup; context: {
+                        name: 'callback url',
+                        controlName: 'failureCallbackUrl',
+                        span: 'Failure',
+                        error: 'Must be a valid HTTP link.'
+                    }"/>
+            </p-accordion-content>
+        </p-accordion-panel>
+    </p-accordion>
+    <button pRipple style="--p-ripple-background: rgba(255, 255, 255, .15)" class="button"
+            [class.loading]="submitting" [class.inactive]="!form.valid"
+            (click)="submit()">
+        <span class="loader"><span></span><span></span><span></span></span>
+        <span class="text">Submit</span>
+    </button>
+</form>
+
+<ng-template let-name="name" let-span="span"
+             let-controlName="controlName" let-error="error" #inputGroup>
+    @let effControlName = controlName || name;
+    <div [class]="'gl--input-group ' + name">
+        <span (click)="$any(inp.nativeElement).focus()">{{ span }}</span>
+        @let control = form.get(effControlName);
+        <app-input class="app-input" [placeholder]="'Enter ' + name + '...'"
+                   [formControl]="$any(control)" #inp/>
+        <span class="error" *ngIf="!control?.valid && control?.touched">{{ error }}</span>
+    </div>
+</ng-template>

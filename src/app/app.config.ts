@@ -78,7 +78,6 @@ export const appConfig: ApplicationConfig = {
 };
 
 export const server: string = serverUri as any;
-export const promo = false;
 export const testnet = false;
 export const mobileModeScreenWidth = 925; // mobile if screen with < this value
 export const tokenCookieName = "wat";
@@ -146,7 +145,7 @@ export const getCoinName = (route: ActivatedRoute): string => {
 };
 
 export const dp = (v?: BigNumber, dp?: number): string => {
-    if (!v || !dp) return "";
+    if (!v || !dp && dp != 0) return "";
     let res = v.dp(dp).toNumber().toFixed(dp);
     if (res.includes(".")) res = res.replace(/0*$/, "");
     if (res.endsWith(".")) res = res.substring(0, res.length - 1);

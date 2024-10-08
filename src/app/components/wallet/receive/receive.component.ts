@@ -68,13 +68,15 @@ export class ReceiveComponent implements AfterViewInit {
         }
     };
 
-    readonly addressOrder = [
+    readonly defaultAddressOrder = [
         "tr",
         "wpkh",
         "wsh",
         "sh",
         "pkh"
     ];
+
+    addressOrder = this.defaultAddressOrder;
 
     loading = true;
     coin: Coin;
@@ -115,6 +117,11 @@ export class ReceiveComponent implements AfterViewInit {
 
     ngAfterViewInit() {
         this.coin = this.wallet.currentCoin(this.route)!;
+        if (this.coin?.shortName == "DOGE" || this.coin?.shortName == "BCH") {
+            this.addressOrder = ["pkh", "sh"];
+        } else {
+            this.addressOrder = this.defaultAddressOrder;
+        }
         const addresses: Observable<AddressBag> = this.wallet.getAddresses(this.coin!).pipe(take(1));
         addresses.subscribe(addresses => {
             this.addresses = Object.entries(addresses)
@@ -165,24 +172,21 @@ export class ReceiveComponent implements AfterViewInit {
 
     get info(): string {
         if (!this.coin) return "";
-        let resource = "";
         let page = "";
         switch (this.coin.shortName.toLowerCase()) {
             case "btc":
-                resource = "https://en.bitcoin.it/wiki";
+                page = "bitcoin-address-types";
+                break;
+            case "ltc":
+                page = "litecoin-address-types";
+                break;
+            case "doge":
+                page = "dogecoin-address-types";
+                break;
+            case "bch":
+                page = "bcash-address-types";
         }
-        if (this.coin.shortName.toLowerCase() == "btc") {
-            switch (this.currentAddress?.type?.toLowerCase()) {
-                case "sh": // fallthrough
-                case "pkh":
-                    page = "/Invoice_address";
-                    break;
-                case "wsh": // fallthrough
-                case "wpkh":
-                    page = "/Segregated_Witness";
-            }
-        }
-        return resource + page;
+        return `https://pecuniawallet.com/wiki/${page}#${this.currentAddress?.type?.toLowerCase()}`;
     }
 
     async share() {

@@ -1,0 +1,199 @@
+@use "styles" as *;
+@use "variables" as *;
+
+:host {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+
+    &.loading {
+        .app-input, .switch, .switch-button, p-select {
+            position: relative;
+            pointer-events: none;
+
+            &::before {
+                @include shine;
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                border-radius: 10px;
+                z-index: 3;
+                pointer-events: none;
+            }
+        }
+
+        span {
+            pointer-events: none;
+        }
+    }
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+}
+
+.token {
+    margin-bottom: 10px;
+
+    & > span {
+        color: fade-out($blue-darker, .15) !important;
+    }
+
+    .input-row {
+        height: 51px;
+
+        span {
+            overflow: hidden;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            font-family: "Ubuntu Mono", monospace;
+            color: rgba(43, 46, 74, .85);
+        }
+
+        button {
+            height: 100%;
+            padding: 0 13px;
+            color: $blue-darker;
+            border-radius: 10px;
+            background: #f8f8f9;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+    }
+}
+
+::ng-deep {
+    p-accordion-content > *:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+        margin-top: 10px;
+        padding-bottom: 35px;
+    }
+
+    .p-dialog-content {
+        scrollbar-gutter: stable;
+    }
+
+    .p-togglebutton-label {
+        color: $red-light;
+    }
+
+    .p-togglebutton-checked .p-togglebutton-label {
+        color: #3e9d2f;
+    }
+
+    p-toggle-button button {
+        width: 100%;
+    }
+
+}
+
+.switch-group {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding-left: 5px;
+
+    span {
+        font-size: 16px;
+        color: $blue-darker;
+        opacity: 0.85;
+        font-weight: 500;
+    }
+
+    .switch {
+        position: relative;
+        top: 2px;
+
+        &-button {
+            min-width: 60px;
+        }
+    }
+
+    &.notify span {
+        min-width: 135px;
+    }
+}
+
+.question {
+    fa-icon {
+        position: relative;
+        left: 2px;
+        top: 0;
+        font-size: 14px;
+        color: $blue-darker;
+        cursor: pointer;
+    }
+}
+
+.misc {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.misc-button {
+    padding: 10px 25px;
+    border-radius: 25px;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: fade-out($blue-darker, .35);
+    font-weight: 500;
+    font-size: 18px;
+    transition: background .15s ease-in-out, color .15s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        background: fade-out($blue-darker, .95);
+        color: $blue-darker;
+    }
+
+    fa-icon {
+        font-size: 16px;
+    }
+
+    &.contact {
+        fa-icon {
+            font-size: 14px;
+        }
+    }
+
+    &.logout {
+        color: fade-out($red-light, .2);
+
+        &:hover {
+            color: $red-light;
+        }
+    }
+}
+
+.form > button {
+    margin: 25px auto 0;
+    min-width: 175px;
+    justify-content: center;
+    min-height: 46px;
+    display: block;
+
+    .text {
+        width: 100%;
+        text-align: center;
+    }
+}

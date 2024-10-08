@@ -1,64 +1,95 @@
 <div class="container">
     <div class="sections">
-        <div class="section">
+        <div class="section section--coins">
             <div class="section__title">
-                <h3 class="section__name">Overview</h3>
+                <h3 class="section__name">Portfolio</h3>
                 @if (_window.isMobile()) {
                     <app-fiat-selector direction="down"/>
                 }
             </div>
-            <div class="section__content">
-                <app-overview/>
+            @let placeholders = !coinButtons || coinButtons.length === 0;
+            <div class="section__content section__content--coins" [style.overflow]="'hidden ' + (placeholders ? '' : 'auto')">
+                <div class="coins"
+                     (dragover)="onContainerDragOver($event)"
+                     (drop)="onContainerDrop($event)">
+                    <div class="placeholders">
+                        <ng-container *ngFor="let i of range(0, currencyService.getCoins().length)">
+                            <div class="placeholder"
+                                 [class.placeholder--shown]="placeholders">
+                            </div>
+                        </ng-container>
+                    </div>
+                    <button *ngFor="let button of coinButtons; let i = index"
+                            class="coin"
+                            [class.coin--active]="route.snapshot.queryParamMap.get('n')
+                                ?.toLowerCase() === button.coin.shortName.toLowerCase()"
+                            routerLink="/wallet/coin"
+                            [queryParams]="{n: button.coin.shortName}"
+                            queryParamsHandling="merge"
+                            draggable="true"
+                            (dragstart)="onDragStart($event, i)"
+                            (dragover)="onDragOver($event, i)"
+                            (dragend)="onDragEnd($event)"
+                            (drop)="onDrop($event, i)"
+                            (touchstart)="onTouchStart($event, i)"
+                            (touchmove)="onTouchMove($event, i)"
+                            (touchend)="onTouchEnd($event)">
+                        <div class="drop-indicator drop-indicator--before"
+                             [class.drop-indicator--active]="dropTargetIndex === i && dropPosition === 'before'"></div>
+                        <fa-icon class="handle" [icon]="faGrip" />
+                        <div class="coin__title">
+                            <img class="coin__image" [ngSrc]="server + button.coin.imageUri"
+                                 width="35" height="35" [alt]="button.coin.shortName">
+                            <div class="coin__names">
+                                <span class="coin__name">{{ button.coin.shortName }}</span>
+                                <span class="coin__name coin__name--side">{{ button.coin.fullName }}</span>
+                            </div>
+                        </div>
+                        <div class="coin__amounts">
+                            <div class="coin__values">
+                                <span class="coin__value">{{ fitBalance(button.coinBalance, button.coin) }}</span>
+                                <span class="coin__value coin__value--side">
+                                    {{ button.fiat.symbol }}&nbsp;{{
+                                        button.fiatBalance.toNumber().toFixed(button.fiat.decimals)
+                                    }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="drop-indicator drop-indicator--after"
+                             [class.drop-indicator--active]="dropTargetIndex === i && dropPosition === 'after'"></div>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="section">
             <div class="section__title">
-                <h3 class="section__name">Portfolio</h3>
+                <h3 class="section__name">Overview</h3>
             </div>
-            <div class="section__content section__content--coins">
-                <div class="placeholders">
-                    <ng-container *ngFor="let i of range(0, currencyService.getCoins().length)">
-                        <div class="placeholder"
-                             [class.placeholder--shown]="!coinButtons || coinButtons.length === 0">
-                        </div>
-                    </ng-container>
-                </div>
-                <div *ngFor="let button of coinButtons" class="coin"
-                     [class.coin--active]="route.snapshot.queryParamMap.get('n')
-                            ?.toLowerCase() == button.coin.shortName.toLowerCase()"
-                     routerLink="/wallet/coin" [queryParams]="{n: button.coin.shortName}"
-                     queryParamsHandling="merge">
-                    <div class="coin__title">
-                        <img class="coin__image" [ngSrc]="server + button.coin.imageUri" width="22" height="22">
-                        <span class="coin__name">{{ button.coin.fullName }}</span>
-                    </div>
-                    <div class="coin__amounts">
-                        <div class="coin__values">
-                            <span class="coin__value">{{ button.coinBalance }}</span>
-                            <span class="coin__value coin__value--side">
-                                {{
-                                    button.fiatBalance.toNumber().toFixed(button.fiat.decimals)
-                                }}
-                            </span>
-                        </div>
-                        <div class="coin__symbols">
-                            <span class="coin__symbol">
-                                {{ button.coin.shortName }}
-                            </span>
-                            <span class="coin__symbol coin__symbol--side"> {{ button.fiat.shortName }} </span>
-                        </div>
-                    </div>
-                </div>
+            <div class="section__content">
+                <app-overview/>
             </div>
         </div>
     </div>
     @if (!_window.isMobile()) {
         <div class="controls">
             <app-fiat-selector direction="up"/>
-            <div class="api-link" routerLink="/office"
-                 queryParamsHandling="merge">
-                <fa-icon [icon]="faCashRegister" />
-                API
+            <div class="api-wrapper">
+                <button
+                        class="api-link"
+                        routerLink="/office"
+                        queryParamsHandling="merge">
+                    <fa-icon [icon]="faCashRegister" />
+                    API
+                </button>
+
+                <button
+                        class="api-hint"
+                        *ngIf="account.shouldShowMerchantHint() | async"
+                        (click)="closeHint($event)">
+                    Your merchant tools are here
+                    <fa-icon class="tail" [icon]="faPlay" />
+                    <fa-icon class="xmark" [icon]="faXmark" />
+                </button>
             </div>
         </div>
     }

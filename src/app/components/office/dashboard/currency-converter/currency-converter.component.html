@@ -1,0 +1,19 @@
+<form [formGroup]="form">
+    @let srcCurrency = form.get("srcCurrency")?.value;
+    @let destCurrency = form.get("destCurrency")?.value;
+
+    <div class="row">
+        <app-input class="input-amount" formControlName="srcAmount" type="number" [min]="0"
+                   [step]="Math.pow(10, -1 * srcCurrency?.decimals || 0)"/>
+        <div class="select">
+            <app-currency-select formControlName="srcCurrency" [currencies]="srcCurrencies"/>
+            <button pRipple (click)="swapCurrencies()"><fa-icon [icon]="faRightLeft" /></button>
+        </div>
+    </div>
+    <div class="row">
+        <app-input class="input-amount" formControlName="destAmount" type="number" [min]="0"
+                   [step]="Math.pow(10, -1 * destCurrency?.decimals || 0)"/>
+        <app-currency-select class="select" formControlName="destCurrency" [currencies]="destCurrencies"/>
+    </div>
+
+</form>

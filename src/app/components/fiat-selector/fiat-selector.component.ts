@@ -6,6 +6,7 @@ import {AsyncPipe, NgIf} from "@angular/common";
 import {ActivatedRoute, Router} from "@angular/router";
 import {CurrencyService} from "../../services/currency.service";
 import {FiatCurrency} from "../../models/FiatCurrency";
+import {AccountService} from "../../services/account.service";
 
 @Component({
     selector: "app-fiat-selector",
@@ -24,6 +25,7 @@ export class FiatSelectorComponent implements OnInit {
     selected: DropdownItem;
 
     constructor(protected currencyService: CurrencyService,
+                protected account: AccountService,
                 protected router: Router) {
     }
 
@@ -38,7 +40,7 @@ export class FiatSelectorComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe((currency) => {
+        this.account.getAccountCurrency().pipe(take(1)).subscribe((currency) => {
             this.selected = this.currencyToItem(currency);
             this.currencies = this.currencyService.getFiatCurrencies().map(this.currencyToItem);
         });
@@ -47,7 +49,7 @@ export class FiatSelectorComponent implements OnInit {
     selectCurrency(shortName: string) {
         const fiat = this.currencyService.findFiatByShortName(shortName);
         if (!fiat) return;
-        this.currencyService.setAccountCurrency(fiat!).subscribe(() => {
+        this.account.setAccountCurrency(fiat!).subscribe(() => {
             const shouldReuseRoute = this.router.routeReuseStrategy.shouldReuseRoute;
             this.router.routeReuseStrategy.shouldReuseRoute = () => false;
             this.router.navigate([this.router.url.split("?")[0] || this.router.url], {
