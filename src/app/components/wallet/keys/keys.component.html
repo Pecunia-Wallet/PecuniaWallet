@@ -1,0 +1,78 @@
+<div class="container">
+
+    <app-wallet-header title="Add keys"/>
+
+    <p class="description" [ngSwitch]="coin.shortName.toLowerCase()">
+        <ng-container *ngSwitchCase="'btc'">
+            Enter your private keys below. Hexadecimal representations
+            (compressed or not) and in the format used by the Bitcoin Core’s
+            «dumprivkey» command are allowed.
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            Enter your private keys below. This will add the keys to
+            your wallet
+        </ng-container>
+    </p>
+
+    <app-modal #modal>
+        <div class="modal">
+            <div class="modal__section">
+                <h3 class="modal__title">Import</h3>
+                <p class="modal__paragraph">
+                    The coins <strong>will be</strong>
+                    transferred to your wallet and become available after the
+                    <strong>transaction is confirmed</strong>.
+                </p>
+            </div>
+            <div class="modal__section">
+                <h3 class="modal__title">Attach</h3>
+                <p class="modal__paragraph">
+                    The coins <strong>will not be</strong>
+                    transferred, but become available via the wallet.
+                    You will see the attached coins in a <strong>little while</strong>.
+                </p>
+            </div>
+        </div>
+    </app-modal>
+
+    <button class="button-info" (click)="modal.show()">
+        <fa-icon [icon]="faInfoCircle"/>
+        Learn the difference between import and attach
+    </button>
+
+    <span *ngIf="error" class="error">
+        Please double-check the keys and try again. Do not enter
+        keys you have already imported or that are belonging to the wallet
+    </span>
+
+    <div class="content">
+        <div class="inputs" [class.inputs--inactive]="loading" #inputs>
+            <app-input placeholder="Private key" class="app-input" [disabled]="loading"
+                       *ngFor="let key of keys" [formControl]="key.form"
+                       (apply)="inputs.scrollTo(0, inputs.scrollHeight);
+                            setInputElement(key, input)" #input/>
+            <div *ngIf="keys.length < MAX_KEY_COUNT" class="add">
+                <fa-icon [icon]="faPlus" (click)="addForm()"/>
+            </div>
+        </div>
+
+        <div class="buttons" #buttons>
+            <button class="button" (click)="import()"
+                    [class.inactive]="!valid"
+                    [style.opacity]="valid ? 1 : .5"
+                    [class.loading]="loading" #importButton>
+                Import
+                <fa-icon class="icon" [icon]="faFileImport"/>
+                <div *ngIf="loading" class="loader"><span></span><span></span><span></span></div>
+            </button>
+            <button class="button button--side" (click)="attach()"
+                    [class.inactive]="!valid"
+                    [style.opacity]="valid ? 1 : .5"
+                    [class.loading]="loading" #attachButton>
+                Attach
+                <fa-icon class="icon" [icon]="faPaperclip"/>
+                <div *ngIf="loading" class="loader"><span></span><span></span><span></span></div>
+            </button>
+        </div>
+    </div>
+</div>

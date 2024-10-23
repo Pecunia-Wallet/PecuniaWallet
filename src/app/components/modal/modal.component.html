@@ -1,0 +1,9 @@
+<div class="frame" #frame>
+    <button class="button-close">
+        <fa-icon [icon]="faXmark" (click)="hide()" />
+    </button>
+    <div class="content">
+        <ng-content />
+    </div>
+    <button class="button" (click)="hide()">Got it</button>
+</div>

@@ -1,0 +1,33 @@
+<app-wallet-header title="Error :(" [params]="{code: null}" />
+
+<div class="content">
+    <div class="head">The operation failed</div>
+    <div class="message" *ngIf="coin" [ngSwitch]="code">
+        <ng-container *ngSwitchCase="-300">
+            {{ coin.fullName.toUpperCase().charAt(0) + coin.fullName.toLowerCase().substring(1) }}
+            network declined the transaction as dusty.
+            It may happen if the private keys has very low balance, you set too low fee, other.
+        </ng-container>
+        <ng-container *ngSwitchCase="-400">
+            Not enough money. Try to lower the fee or enable subtraction from amount.
+        </ng-container>
+        <ng-container *ngSwitchDefault>
+            The transaction declined by network.
+        </ng-container>
+    </div>
+    <div class="options">
+        <div class="option">
+            <button class="button" (click)="edit()">
+                Edit private keys
+                <fa-icon [icon]="faPenToSquare" />
+            </button>
+        </div>
+        <div class="option">
+            <button class="button" routerLink="/wallet/coin" queryParamsHandling="merge"
+                    [queryParams]="{code: null}">
+                Return to main
+                <fa-icon [icon]="faHome" />
+            </button>
+        </div>
+    </div>
+</div>
