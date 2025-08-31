@@ -7,6 +7,7 @@ import {HttpClient} from "@angular/common/http";
 import {FooterComponent} from "../footer/footer.component";
 import {MarqueeComponent} from "../marquee/marquee.component";
 import {promo, server} from "../../app.config";
+import {AuthService} from "../../services/auth.service";
 
 export interface FuncButton {
     render: (el: Element) => void,
@@ -27,7 +28,7 @@ export interface FuncButton {
         NgIf
     ],
     templateUrl: "./code.component.html",
-    styleUrls: ["./code.component.scss"]
+    styleUrl: "./code.component.scss"
 })
 export abstract class CodeComponent implements OnInit {
 
@@ -44,7 +45,8 @@ export abstract class CodeComponent implements OnInit {
 
     protected constructor(protected ref: ElementRef,
                           protected sanitizer: DomSanitizer,
-                          protected http: HttpClient) {}
+                          protected http: HttpClient,
+                          protected auth: AuthService) {}
 
     ngOnInit() {
         this.buttons = [];
@@ -73,7 +75,7 @@ export abstract class CodeComponent implements OnInit {
         el.classList.add("key--icon");
         el.innerHTML = `<img src="${server}/images/${name}.svg" alt="${name}"
                              style="width: ${width}px; height: ${height}px">`
-    };
+    }
 
     funcButtonLeft(): FuncButton {
         return {
@@ -81,7 +83,7 @@ export abstract class CodeComponent implements OnInit {
                 this.renderIcon(el, "exit", 40, 37);
                 el.classList.add("key--permanent");
             },
-            onclick: () => window.location.href = "/logout"
+            onclick: () => this.auth.logout()
         };
     }
 

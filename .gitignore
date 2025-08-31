@@ -4,6 +4,8 @@ application.yml
 application.properties
 passwords/
 ssl/
+env.dev.ts
+env.prod.ts
 *-firebase-adminsdk-*.json
 firebase.json
 

@@ -70,7 +70,7 @@ export class DropdownComponent implements OnInit {
             this.loading = true;
         if (!this.selected && this.items?.length > 0) this.selected = this.items[0];
 
-        if (!this.selected?.image) this.loading = false;
+        // if (!this.selected?.image) this.loading = false;
     }
 
     toggle() {

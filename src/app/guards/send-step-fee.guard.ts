@@ -7,7 +7,9 @@ export const sendStepFeeGuard: CanActivateFn = (route, state) => {
     const router = inject(Router);
 
     const sendData = !!broker.data?.sendData;
-    if (!sendData) router.navigate(["/wallet/coin/send"]);
+    if (!sendData) router.navigate(["/wallet/coin/send"], {
+        queryParamsHandling: "merge"
+    });
 
     return !!broker.data?.sendData;
 };

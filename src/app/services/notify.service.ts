@@ -12,12 +12,6 @@ export class NotifyService {
         show: boolean,
         variation: "error"
     }> = new ReplaySubject();
-    notification$: Subject<{
-        title: string,
-        text: SafeHtml,
-        icon: IconProp,
-        hideAfter?: number
-    }> = new Subject();
 
     constructor() {}
 

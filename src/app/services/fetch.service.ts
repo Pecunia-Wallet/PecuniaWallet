@@ -15,6 +15,7 @@ export const hoursDifference = (d1: Date, d2: Date): number => {
 
 export interface HttpRenewOpts {
     url: string;
+    queryParams?: any;
     sendCredentials?: boolean;
     raw?: boolean;
     retry?: number;
@@ -45,16 +46,17 @@ export class FetchService {
             const loadingRequest = this.requestCache
                 .find(([_conf]) => configsEqual(conf, _conf));
             if (loadingRequest) return loadingRequest[1].asObservable();
-            let opts: HttpRenewOpts = conf.renew as HttpRenewOpts;
+            const opts: HttpRenewOpts = conf.renew as HttpRenewOpts;
             const renew = !("url" in conf.renew) ? conf.renew :
                 (): Observable<R | string> => {
                     const httpParams: any = {
-                        withCredentials: opts.sendCredentials
+                        withCredentials: opts.sendCredentials,
+                        params: opts.queryParams
                     };
                     if (opts.raw) httpParams.responseType = "text";
                     return opts.raw
                         ? this.http.get(opts.url, httpParams)
-                            .pipe(retry(opts.retry || 1)) as unknown as Observable<string>
+                            .pipe(retry(opts.retry || 1)) as any
                         : this.http.get<R>(opts.url, httpParams)
                             .pipe(retry(opts.retry || 1)) as Observable<R>;
                 };
@@ -70,7 +72,7 @@ export class FetchService {
             };
 
             renew(conf.subject.value).pipe(switchMap((response: string | R) => {
-                const parse = conf.parse || ((r: R | string) => r as unknown as T);
+                const parse = conf.parse || ((r: R | string) => r as any);
                 let data = parse(opts.raw ? response as string : response as R);
                 if (data instanceof Promise) data = fromPromise(data);
                 if (data instanceof Observable) {
@@ -83,6 +85,7 @@ export class FetchService {
                 }
             })).subscribe({
                 error: (err) => {
+                    console.error(err)
                     requestSubject.error(err);
                     this.requestCache = this.requestCache
                         .filter(([_conf]) => !configsEqual(conf, _conf));

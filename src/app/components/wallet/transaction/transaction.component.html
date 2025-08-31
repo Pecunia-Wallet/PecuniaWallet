@@ -2,49 +2,92 @@
 
 <app-wallet-header title="Transaction" [params]="{ id: null }"/>
 
-<span *ngIf="badId" class="error">
-    Transaction with such id doesn't exist, isn't confirmed, or doesn't belong to your wallet 🤷‍♀️
-</span>
-<ng-container *ngIf="!badId">
-    <div class="table">
-        <div class="row">
-            <span class="name">ID:</span>
-            <span class="content">{{ tx?.id }}</span>
+@if (badId) {
+    <span class="error">
+        Transaction with such id doesn't exist or doesn't belong to your wallet 🤷‍♀️
+    </span>
+} @else {
+    <div class="sections">
+        <div class="section">
+            <span class="section__title">Network</span>
+            <div class="property property--id">
+                <a class="property__name property__name--copyable" tabindex="3"
+                   (click)="copyId()" (keydown)="copyId()">
+                    ID <fa-icon [icon]="faCopy"/>
+                </a>
+                <span class="property__content">{{ tx?.id }}</span>
+            </div>
+            <div class="property">
+                <span class="property__name">Fee</span>
+                <span class="property__content">
+                    {{ tx?.fee?.toNumber()?.toFixed(coin?.decimals) }}&nbsp;{{ coin?.shortName }}
+                </span>
+            </div>
         </div>
-        <div class="row">
-            <span class="name">Timestamp:</span>
-            <span class="content">{{ tx?.time | date: "dd.MM.yyyy, HH:mm:ss" }}</span>
+        <div class="section section--block">
+            <span class="section__title">Block</span>
+            <div class="section__content">
+                <div class="property">
+                    <span class="property__name">Timestamp</span>
+                    <span class="property__content">
+                        {{ tx?.time ? (tx?.time | date: "yyyy-MM-dd HH:mm:ss") : "&lt;in mempool&gt;" }}
+                    </span>
+                </div>
+                <div class="property property--confirmed">
+                    <span class="property__name">Confirmed</span>
+                    <span class="property__content">
+                        <app-circle-progress class="property__diagram" fillColor="#47ea2d" emptyColor="#e84545"
+                                             [percent]="(tx?.confirmations ?? 0)/(coin?.requiredConfirmations ?? 1) * 100"/>
+                        {{ tx?.confirmations ?? 0 }} time{{ (tx?.confirmations ?? 0) !== 1 ? 's' : '' }}
+                    </span>
+                </div>
+            </div>
         </div>
-        <div class="row">
-            <span class="name">Confirmed:</span>
-            <span class="content">
-            {{ tx?.confirmations }} time{{ (tx?.confirmations || 0) != 1 ? 's' : '' }}
-        </span>
-        </div>
-        <div class="row">
-            <span class="name">{{ tx?.amount?.isPositive() ? "Received on" : "Sent to" }}:</span>
-            <span class="content" *ngIf="tx?.addresses">
-                <ng-container *ngFor="let addr of tx!.addresses; index as i">
-                    {{ addr }}
-                    <ng-container *ngIf="i + 1 < tx!.addresses.length"><br></ng-container>
-                </ng-container>
-            </span>
-        </div>
-        <div class="row">
-            <span class="name">Amount:</span>
-            <span class="content">
-            {{ tx?.amount?.abs()?.toNumber()?.toFixed(coin?.decimals) }} {{ coin?.shortName }}
-        </span>
-        </div>
-        <div class="row">
-            <span class="name">Fee:</span>
-            <span class="content">
-            {{ tx?.fee?.toNumber()?.toFixed(coin?.decimals) }} {{ coin?.shortName }}
-        </span>
+        <div class="section section--wallet">
+            <span class="section__title">Wallet</span>
+            <div class="section__content">
+                @let sign = signum(tx?.amount);
+                <div class="property property--amount"
+                     [class.positive]="sign === '+'"
+                     [class.negative]="sign === '-'">
+                    <span class="property__name">Amount</span>
+                    <span class="property__content">
+                    {{ sign }}{{ tx?.amount?.abs()?.toNumber()?.toFixed(coin?.decimals) }}&nbsp;{{ coin?.shortName }}
+                </span>
+                </div>
+                <div class="property property--address" *ngIf="!!tx?.addresses">
+                <a class="property__name property__name--copyable" tabindex="8"
+                   (click)="copyAddresses()" (keydown)="copyAddresses()">
+                    @switch (tx?.type) {
+                        @case ("SEND") {
+                            Sent to
+                        }
+                        @case ("RECEIVE") {
+                            Received on
+                        }
+                        @case ("MOVE") {
+                            Moved to
+                        }
+                        @case ("COIN_JOIN") {
+                            Mixed to
+                        }
+                    }
+                    <fa-icon [icon]="faCopy"/>
+                </a>
+                <span class="property__content">
+                    <span>
+                        {{ tx!.addresses[0] }}
+                    </span>
+                    <span *ngIf="tx!.addresses.length > 1">
+                        ...and {{ tx!.addresses.length - 1 }} more
+                    </span>
+                </span>
+                </div>
+            </div>
         </div>
     </div>
-    <a class="button link" [href]="'https://blockstream.info/tx/' + tx?.id" target="_blank">
+    <a class="button link" [href]="(coin?.explorer ?? '') + (tx?.id ?? '')" target="_blank">
         View in explorer
         <fa-icon class="link__icon" [icon]="faArrowUpRightFromSquare"/>
     </a>
-</ng-container>
+}

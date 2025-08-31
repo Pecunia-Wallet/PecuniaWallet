@@ -11,9 +11,7 @@ import {FiatCurrency} from "../../models/FiatCurrency";
     selector: "app-fiat-selector",
     standalone: true,
     imports: [
-        DropdownComponent,
-        AsyncPipe,
-        NgIf
+        DropdownComponent
     ],
     templateUrl: "./fiat-selector.component.html",
     styleUrl: "./fiat-selector.component.scss"
@@ -22,11 +20,12 @@ export class FiatSelectorComponent implements OnInit {
 
     @Input() direction: "up" | "down" = "down";
 
-    currencies$ = new BehaviorSubject<Array<DropdownItem>>([]);
+    currencies: DropdownItem[] = [];
     selected: DropdownItem;
 
     constructor(protected currencyService: CurrencyService,
-                protected router: Router) {}
+                protected router: Router) {
+    }
 
     private currencyToItem(currency: FiatCurrency): DropdownItem {
         return Object.assign(new DropdownItem(), {
@@ -39,28 +38,22 @@ export class FiatSelectorComponent implements OnInit {
     }
 
     ngOnInit() {
-        forkJoin([
-            this.currencyService.getFiatCurrencies().pipe(take(1)),
-            this.currencyService.getAccountCurrency().pipe(take(1))
-        ]).subscribe(([fiats, currency]) => {
+        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe((currency) => {
             this.selected = this.currencyToItem(currency);
-            this.currencies$.next(fiats.map(this.currencyToItem));
+            this.currencies = this.currencyService.getFiatCurrencies().map(this.currencyToItem);
         });
     }
 
-    selectCurrency(name: string) {
-        this.currencyService.getFiatCurrencies()
-            .subscribe(fiats => {
-                const fiat = fiats.find(fiat => fiat.shortName == name);
-                if (!fiat) return;
-                this.currencyService.setAccountCurrency(fiat).subscribe(() => {
-                    const shouldReuseRoute = this.router.routeReuseStrategy.shouldReuseRoute;
-                    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-                    this.router.navigate([this.router.url.split("?")[0] || this.router.url], {
-                        queryParamsHandling: "merge"
-                    }).then(() => this.router.routeReuseStrategy.shouldReuseRoute = shouldReuseRoute);
-                });
-            });
+    selectCurrency(shortName: string) {
+        const fiat = this.currencyService.findFiatByShortName(shortName);
+        if (!fiat) return;
+        this.currencyService.setAccountCurrency(fiat!).subscribe(() => {
+            const shouldReuseRoute = this.router.routeReuseStrategy.shouldReuseRoute;
+            this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+            this.router.navigate([this.router.url.split("?")[0] || this.router.url], {
+                queryParamsHandling: "merge"
+            }).then(() => this.router.routeReuseStrategy.shouldReuseRoute = shouldReuseRoute);
+        });
     }
 
 }

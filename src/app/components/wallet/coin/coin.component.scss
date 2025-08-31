@@ -59,19 +59,33 @@
 .balances {
     display: flex;
     gap: 10px;
+    position: relative;
 
     .amount {
         display: flex;
         align-items: center;
         gap: 10px;
 
+        &__value, &__currency {
+            font-family: "Ubuntu Mono", monospace;
+        }
+
         &__value {
             font-size: 26px;
+
+            &--unconfirmed {
+                font-size: 14px;
+                color: #3e9d2f;
+                position: absolute;
+                bottom: -15px;
+                width: 100%;
+                text-align: center;
+            }
         }
 
         &__currency {
             font-size: 20px;
-            font-weight: 500;
+            font-weight: 700;
             color: fade-out($blue-darker, .3);
         }
     }
@@ -87,6 +101,7 @@
     display: flex;
     align-items: center;
     gap: 65px;
+    margin-top: 10px;
 
     .btn-control {
         display: flex;
@@ -267,8 +282,7 @@
             background: #fff;
             box-shadow: 0 0 4px -2px fade-out($blue-darker, .5);
 
-            fa-icon {
-                color: #fff;
+            &--receive fa-icon, &--send fa-icon {
                 font-size: 18px;
                 transform: rotate(45deg);
             }
@@ -279,6 +293,19 @@
 
             &--send fa-icon {
                 color: $red-light;
+            }
+
+            &--mempool fa-icon {
+                color: $blue-dark;
+                animation: 3s linear rotate infinite;
+
+                @keyframes rotate {
+                    from {
+                        transform: rotate(0);
+                    } to {
+                          transform: rotate(360deg);
+                      }
+                }
             }
         }
 
@@ -302,6 +329,7 @@
             gap: 4px;
 
             a {
+                font-family: "Ubuntu Mono", monospace;
                 font-size: 14px;
                 font-weight: lighter;
                 color: $blue;
@@ -349,7 +377,7 @@
 
         &__value {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             letter-spacing: .05em;
             gap: 7px;
 
@@ -359,6 +387,10 @@
                         font-size: 12px;
                         font-weight: lighter;
                         color: fade-out($blue-darker, .5);
+
+                        @media (width <= 425px) {
+                            font-size: 10px;
+                        }
                     }
 
                     &:nth-child(2) {
@@ -372,6 +404,7 @@
         &__amount {
             font-size: 16px;
             font-weight: 400;
+            font-family: "Ubuntu Mono", monospace;
 
             &--fee {
                 font-size: 14px;

@@ -1,3 +1,7 @@
+@if (isMobile()) {
+    <app-float-bar class="menu" [links]="menuItems" [id]="menuId"/>
+}
+
 <div class="content">
     <router-outlet />
 </div>

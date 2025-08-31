@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, HostBinding, HostListener, Input, OnInit} from "@angular/core";
 import {IconProp} from "@fortawesome/angular-fontawesome/types";
-import {NgForOf, NgIf} from "@angular/common";
+import {NgForOf, NgIf, NgTemplateOutlet} from "@angular/common";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {Router, RouterLink} from "@angular/router";
 
@@ -9,8 +9,9 @@ interface Settings {
 }
 
 export interface BarLink {
-    uri: string;
     text: string;
+    uri: string;
+    onClick?: () => void;
     image?: IconProp;
 }
 
@@ -21,7 +22,8 @@ export interface BarLink {
         NgForOf,
         NgIf,
         FaIconComponent,
-        RouterLink
+        RouterLink,
+        NgTemplateOutlet
     ],
     templateUrl: "./float-bar.component.html",
     styleUrl: "./float-bar.component.scss"
@@ -77,18 +79,25 @@ export class FloatBarComponent implements OnInit, AfterViewInit {
         const settings: Settings = JSON.parse(localStorage.getItem(this.id) || "{}");
         if (this.hidden == undefined) {
             const hidden = !!settings.hideByDefault;
-            let transition = this.ref.nativeElement.style.transition;
+            const transition = this.ref.nativeElement.style.transition;
             if (hidden) {
                 this.ref.nativeElement.style.transition = "none";
             }
             this.hidden = hidden;
             setTimeout(() => this.ref.nativeElement.style.transition = transition, 50);
-                // this.ref.nativeElement.style.transform = "translateY(calc(var(--control-gap) * 2 + 2px - 100%))";
         }
     }
 
     persistSettings(settings: Settings) {
         localStorage.setItem(this.id, JSON.stringify(settings));
+    }
+
+    navigate(link: BarLink) {
+        if (!this.router.url.startsWith(link.uri)) {
+           this.router.navigate([link.uri], {
+               queryParamsHandling: "preserve"
+           });
+        }
     }
 
 }

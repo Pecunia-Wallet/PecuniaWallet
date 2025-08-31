@@ -44,6 +44,8 @@
     padding: 3px 0;
     opacity: .7;
     transition: opacity .07s ease-out;
+    background: none;
+    border: none;
 
     &__text, &__image {
         font-size: 18px;
@@ -52,6 +54,10 @@
     &__text {
         text-transform: uppercase;
         font-weight: bold;
+    }
+
+    &__image {
+        color: $blue-darker;
     }
 
     &--active {

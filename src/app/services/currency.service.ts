@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpContext} from "@angular/common/http";
-import {BehaviorSubject, filter, first, firstValueFrom, map, mergeMap, Observable} from "rxjs";
-import {binance, CSRF, server} from "../app.config";
+import {HttpClient} from "@angular/common/http";
+import {BehaviorSubject, filter, first, firstValueFrom, map, Observable} from "rxjs";
+import {server} from "../app.config";
 import BigNumber from "bignumber.js";
 import {fromPromise} from "rxjs/internal/observable/innerFrom";
 import {AuthService} from "./auth.service";
@@ -9,6 +9,7 @@ import {FetchService, minutesDifference} from "./fetch.service";
 import {FiatCurrency} from "../models/FiatCurrency";
 import {Rate} from "../models/Rate";
 import {Coin} from "../models/Coin";
+import {Currency} from "../models/Currency";
 
 @Injectable({
     providedIn: "root"
@@ -27,37 +28,91 @@ export class CurrencyService {
                 private fetcher: FetchService) {
         setInterval(() => this.renewRates(), 1000 * 60 * 2);
         this.renewRates();
-        this.auth.auth$.pipe(filter(() => !!auth), first()).subscribe(_ => {
+        this.auth.auth$.pipe(filter(auth => auth), first()).subscribe(_ => {
             this.getAccountCurrency().subscribe();
         });
     }
 
-    public getFiatCurrencies(): Observable<Array<FiatCurrency>> {
-        return this.fetcher.fetch({
-            subject: this.fiats$,
-            when: v => v.length == 0,
-            renew: {
-                url: `${server}/res/fiat`
+    public getFiatCurrencies(): Array<FiatCurrency> {
+        return [
+            {
+                "shortName": "USD",
+                "symbol": "$",
+                "decimals": 2,
+                "fullName": "US Dollar",
+                "imageUri": "/images/usa.svg"
+            },
+            {
+                "shortName": "EUR",
+                "symbol": "€",
+                "decimals": 2,
+                "fullName": "Euro",
+                "imageUri": "/images/eu.svg"
+            },
+            {
+                "shortName": "JPY",
+                "symbol": "¥",
+                "decimals": 0,
+                "fullName": "Japanese Yen",
+                "imageUri": "/images/japan.svg"
             }
-        });
+        ];
     }
 
-    public getCoins(): Observable<Array<Coin>> {
-        return this.fetcher.fetch({
-            subject: this.coins$,
-            when: v => v.length == 0,
-            renew: {
-                url: `${server}/res/coins`
+    public getCoins(): Array<Coin> {
+        return [
+            // {
+            //     "shortName": "BTC",
+            //     "fullName": "Bitcoin",
+            //     "decimals": 8,
+            //     "imageUri": "/images/btc.svg",
+            //     "symbol": "₿",
+            //     "color": "#f7931a",
+            //     "defaultAddressType": "wpkh",
+            //     "requiredConfirmations": 3,
+            //     "unitName": "sat",
+            //     "explorer": "https://mempool.space/tx/"
+            // },
+            {
+                "shortName": "LTC",
+                "fullName": "Litecoin",
+                "decimals": 8,
+                "imageUri": "/images/ltc.svg",
+                "symbol": "Ł",
+                "color": "#345d9d",
+                "defaultAddressType": "wpkh",
+                "requiredConfirmations": 6,
+                "unitName": "lit",
+                "explorer": "https://blockchair.com/litecoin/transaction/"
             }
-        });
+        ];
+    }
+
+    public getCurrencies(): Array<Currency> {
+        return [...this.getFiatCurrencies(), ...this.getCoins()];
+    }
+
+    public findCurrencyByShortName(shortName?: string): Currency | undefined {
+        return this.findByShortName(this.getCurrencies(), shortName);
+    }
+
+    public findCoinByShortName(shortName?: string): Coin | undefined {
+        return this.findByShortName(this.getCoins(), shortName);
+    }
+
+    public findFiatByShortName(shortName?: string): FiatCurrency | undefined {
+        return this.findByShortName(this.getFiatCurrencies(), shortName);
+    }
+
+    private findByShortName(collection: any[], shortName?: string): any | undefined {
+        if (!shortName) return undefined;
+        return collection.find(c => c.shortName.toLowerCase() === shortName.toLowerCase());
     }
 
     public async renewRates() {
         try {
-            const [coins, fiats] = await Promise.all([
-                firstValueFrom(this.getCoins()),
-                firstValueFrom(this.getFiatCurrencies())
-            ]);
+            const coins = this.getCoins();
+            const fiats = this.getFiatCurrencies();
 
             const bRates = await firstValueFrom(
                 this.http.get<Array<{
@@ -65,14 +120,12 @@ export class CurrencyService {
                 }>>(`${server}/res/rates`)
             );
 
-            // @ts-ignore as soon as we filter results
             const rates: Rate[] = bRates.map(bRate => {
                 const coin = coins.find(c => c.shortName.toUpperCase() == bRate.coin);
                 const fiat = fiats.find(f => f.shortName.toUpperCase() == bRate.fiat);
                 return new Rate(coin, fiat, new BigNumber(bRate.rate));
             }).filter(rate => !!rate);
 
-            console.log(rates)
             this.rates$.next(rates);
             this.lastRatesUpdate = new Date();
         } catch (error) {
@@ -90,37 +143,76 @@ export class CurrencyService {
         })
     }
 
-    private round(value: BigNumber, type: FiatCurrency | Coin) {
+    private round(value: BigNumber, type: Currency) {
         return value.dp(type.decimals, BigNumber.ROUND_HALF_UP);
     }
 
-    public transfer(amount: BigNumber, from: FiatCurrency | Coin, to: Coin | FiatCurrency): Observable<BigNumber> {
+    public transfer(amount: BigNumber, from: Currency, to: Currency): Observable<BigNumber> {
         if (!amount || !from || !to) throw new Error("Illegal argument: null.");
         amount = this.round(amount, from);
         return this.getRates().pipe(map(rates => {
-            const fromFiat = "symbol" in from;
-            let rate = rates.find(rate =>
-                rate.fiat.shortName == (fromFiat ? from : to).shortName &&
-                rate.coin.shortName == (fromFiat ? to : from).shortName
+            const convertDirect = (amt: BigNumber, rate: BigNumber, isFromFiat: boolean) =>
+                isFromFiat ? amt.dividedBy(rate) : amt.multipliedBy(rate);
+
+            const isFromFiat = !("color" in from);
+            const directRate = rates.find(rate =>
+                rate.fiat.shortName === (isFromFiat ? from : to).shortName &&
+                rate.coin.shortName === (isFromFiat ? to : from).shortName
             )?.rate;
-            if (!rate) throw new Error("Runtime error.");
-            return this.round(fromFiat ? amount.dividedBy(rate) : amount.multipliedBy(rate), to);
+            if (directRate) {
+                return this.round(convertDirect(amount, directRate, isFromFiat), to);
+            }
+
+            const getIntermediaryRate = (currency: Currency, intermediary: string, conversionType: "crypto" | "fiat"): BigNumber | undefined =>
+                conversionType === "crypto"
+                    ? rates.find(rate => rate.fiat.shortName === intermediary && rate.coin.shortName === currency.shortName)?.rate
+                    : rates.find(rate => rate.coin.shortName === intermediary && rate.fiat.shortName === currency.shortName)?.rate;
+
+            const convertViaIntermediary = (
+                amt: BigNumber,
+                fromCur: Currency,
+                toCur: Currency,
+                intermediary: string,
+                conversionType: "crypto" | "fiat"
+            ): BigNumber => {
+                const fromRate = getIntermediaryRate(fromCur, intermediary, conversionType);
+                const toRate = getIntermediaryRate(toCur, intermediary, conversionType);
+                if (!fromRate || !toRate) {
+                    throw new Error(`Runtime error: Missing intermediary ${conversionType} rates.`);
+                }
+                return conversionType === "crypto"
+                    ? amt.multipliedBy(fromRate).dividedBy(toRate)
+                    : amt.dividedBy(fromRate).multipliedBy(toRate);
+            };
+
+            const isFromCrypto = "color" in from;
+            const isToCrypto = "color" in to;
+
+            if (isFromCrypto && isToCrypto) {
+                return this.round(convertViaIntermediary(amount, from, to, "USD", "crypto"), to);
+            } else if (!isFromCrypto && !isToCrypto) {
+                return this.round(convertViaIntermediary(amount, from, to, "BTC", "fiat"), to);
+            }
+
+            throw new Error("Runtime error: Conversion rate not found.");
         }));
     }
 
     public getAccountCurrency(): Observable<FiatCurrency> {
         return this.fetcher.fetch({
             subject: this.accountCurrency$,
-            when: () => minutesDifference(this.lastAccountCurrencyUpdate, new Date()) > 1,
-            parse: name => this.getFiatCurrencies().pipe(map(fiats => {
+            when: () => minutesDifference(this.lastAccountCurrencyUpdate, new Date()) > 5,
+            parse: name => {
+                const fiats = this.getFiatCurrencies();
                 const currency = fiats.find(f => f.shortName == name);
                 this.lastAccountCurrencyUpdate = new Date()
                 return currency || fiats[0];
-            })),
+            },
             renew: {
                 url: `${server}/account/currency`,
                 sendCredentials: true,
-                raw: true
+                raw: true,
+                retry: 3
             }
         })
     }

@@ -19,6 +19,8 @@ import {IdentityService} from "../../../../services/identity.service";
 import {catchError, of} from "rxjs";
 import {FeeEditorComponent} from "../fee-editor.component";
 import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
+import {Select} from "primeng/select";
+import {CurrencyService} from "../../../../services/currency.service";
 
 @Component({
     selector: "app-send-step-fee",
@@ -35,20 +37,22 @@ import {faPaperPlane} from "@fortawesome/free-solid-svg-icons";
         InputComponent,
         FaIconComponent,
         ApplyDirective,
-        TitleCasePipe
+        TitleCasePipe,
+        Select
     ],
     templateUrl: "../fee-editor.component.html",
     styleUrl: "../fee-editor.component.scss"
 })
 export class SendStepFeeComponent extends FeeEditorComponent {
 
-    constructor(broker: BrokerService,
+    constructor(currencyService: CurrencyService,
+                broker: BrokerService,
                 bundle: BundleService,
                 wallet: WalletService,
                 route: ActivatedRoute,
                 router: Router,
                 id: IdentityService) {
-        super(broker, bundle, wallet, route, router, id);
+        super(currencyService, broker, bundle, wallet, route, router, id);
     }
 
     override get uid() {
@@ -87,27 +91,32 @@ export class SendStepFeeComponent extends FeeEditorComponent {
             this.broker.data.send = {
                 preventRestore: true
             };
+            // FIXME not redirecting
             this.wallet.send(this.coin, this.broker.data.sendData.recipients!,
                 new BigNumber(this.feePerKb), this.recipientsPayFees)
                 .pipe(catchError(err => {
-                    this.loading = false
+                    this.loading = false;
+                    console.error(err);
                     return of(err);
                 }))
                 .subscribe((response) => {
-                    if (response.code == 0) this.router.navigate(["../success"], {
-                        relativeTo: this.route,
-                        queryParamsHandling: "merge",
-                        queryParams: {
-                            id: response.txId
-                        }
-                    })
-                    else this.router.navigate(["../error"], {
-                        relativeTo: this.route,
-                        queryParamsHandling: "merge",
-                        queryParams: {
-                            code: response.code
-                        }
-                    });
+                    if (response.code == 0) {
+                        this.router.navigate(["../success"], {
+                            relativeTo: this.route,
+                            queryParamsHandling: "merge",
+                            queryParams: {
+                                id: response.txId
+                            }
+                        })
+                    } else {
+                        this.router.navigate(["../error"], {
+                            relativeTo: this.route,
+                            queryParamsHandling: "merge",
+                            queryParams: {
+                                code: response.code
+                            }
+                        });
+                    }
                     this.loading = false;
                 });
         });

@@ -7,7 +7,7 @@ import {
     HostListener,
     Input, OnChanges,
     OnInit,
-    Output, SimpleChanges,
+    Output,
     ViewChild
 } from "@angular/core";
 import {faChevronDown, faChevronUp} from "@fortawesome/free-solid-svg-icons";
@@ -50,8 +50,10 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
     @Input() max: number;
     @Input() disabled = false;
     @Input() error = false;
+    @Input() prefix: string;
+    @Input() suffix: string;
 
-    @Output() input: EventEmitter<string> = new EventEmitter();
+    @Output() inputed: EventEmitter<string> = new EventEmitter();
     @Output() touched: EventEmitter<void> = new EventEmitter();
 
     private intervalId?: number;
@@ -65,7 +67,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
     mask: string;
     allowNegatives = false;
     patterns = {
-        "X": {pattern: /.*/g},
+        "X": {pattern: /.*/g}
     }
 
     ngOnInit() {
@@ -94,7 +96,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
     }
 
     registerOnChange(fn: (value: string) => void): void {
-        this.input.subscribe(v => {
+        this.inputed.subscribe(v => {
             if (this.type == "number") {
                 v = v.replaceAll(/[^0-9.]/g, "");
                 if (v == ".") v = "0.";
@@ -118,12 +120,14 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
 
     @HostListener("keydown.arrowUp")
     startIncrease() {
+        if (this.type != "number") return;
         if (!this.changing || (this.changing && !this.growing))
             this.startChange(true);
     }
 
     @HostListener("keydown.arrowDown")
     startDecrease() {
+        if (this.type != "number") return;
         if (!this.changing || (this.changing && this.growing))
             this.startChange(false);
     }
@@ -134,16 +138,16 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
         this.growing = grow;
         this.updateValue(grow);
         this.speed = 200;
-        this.intervalId = setInterval(() => this.updateValue(grow), this.speed);
-        this.speedIntervalId = setInterval(() => {
+        this.intervalId = window.setInterval(() => this.updateValue(grow), this.speed);
+        this.speedIntervalId = window.setInterval(() => {
             clearInterval(this.intervalId);
             this.speed = 300 * Math.exp(-0.25 * this.speedIntervalIteration++);
-            this.intervalId = setInterval(() => this.updateValue(grow), this.speed);
+            this.intervalId = window.setInterval(() => this.updateValue(grow), this.speed);
             if (this.speedIntervalIteration > 30)
                 if (this.stepFactor < Math.pow(10, this.dp(this.step) / 1.2))
                     this.stepFactor *= 1.5;
-            if (this.speedIntervalIteration > 75)
-                this.stepFactor *= 3;
+            // if (this.speedIntervalIteration > 75)
+            //     this.stepFactor *= 3;
         }, this.speed)
     }
 
@@ -166,11 +170,15 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
     }
 
     private updateValue(grow: boolean) {
-        const step = new BigNumber(this.step || 1).multipliedBy(new BigNumber(this.stepFactor));
-        const value = new BigNumber(this.value || 0);
+        const step = new BigNumber(this.step ?? 1).multipliedBy(new BigNumber(this.stepFactor));
+        // let value: any = this.value + "";
+        // console.log(this.value, value, this.prefix?.length ?? 0, value.length - (this.suffix?.length ?? 0)) ?? 0)
+        const value = new BigNumber(this.value);
+        // console.log(value)
 
-        const min = (this.min || this.min == 0) && value.comparedTo(this.min) <= 0 && !grow;
-        const max = (this.max || this.max == 0) && value.comparedTo(this.max) >= 0 && grow;
+        const min = (this.min || this.min == 0) && value.comparedTo(this.min)! <= 0 && !grow;
+        const max = (this.max || this.max == 0) && value.comparedTo(this.max)! >= 0 && grow;
+        console.log(this.min, min, this.max, max)
         if (min || max) {
             this.stopChange();
             return;
@@ -182,6 +190,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
                 value.plus(step),
                 new BigNumber(this.max || +Infinity)
             );
+            console.log(newValue.toString())
         } else {
             newValue = BigNumber.max(
                 value.minus(step),
@@ -190,8 +199,10 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnIn
         }
 
         if (newValue !== value) {
+            console.log(this.dp(this.step))
             this.value = newValue.toFixed(this.dp(this.step)).replace(",", ".");
-            this.input.emit(this.value);
+            console.log(this.value)
+            this.inputed.emit(this.value);
         }
     }
 

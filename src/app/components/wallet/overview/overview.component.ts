@@ -4,7 +4,7 @@ import {ChartConfiguration, ChartOptions, TooltipItem} from "chart.js";
 import {WalletService} from "../../../services/wallet.service";
 import {forkJoin, map, Observable, skip, Subject, take} from "rxjs";
 import {HttpClient, HttpContext} from "@angular/common/http";
-import {binance, CSRF, server, sleep} from "../../../app.config";
+import {doughnutConfig, server, sleep} from "../../../app.config";
 import BigNumber from "bignumber.js";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {faArrowDown, faArrowUp, faMinus} from "@fortawesome/free-solid-svg-icons";
@@ -12,7 +12,6 @@ import {NgIf, PercentPipe} from "@angular/common";
 import {CurrencyService} from "../../../services/currency.service";
 import {Coin} from "../../../models/Coin";
 import {FiatCurrency} from "../../../models/FiatCurrency";
-import defaultCallbacks from "chart.js/dist/plugins/plugin.tooltip";
 import {NgVarDirective} from "../../../directives/ng-var.directive";
 
 @Component({
@@ -40,65 +39,20 @@ export class OverviewComponent implements OnInit {
     animation = true;
 
     get chartSettings(): ChartOptions<"doughnut"> {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const ctx = this;
-        return {
-            locale: "en-US",
-            responsive: true,
-            elements: {
-                arc: {
-                    hoverOffset: 3
-                }
-            },
-            animation: {
-                animateRotate: this.animation
-            },
-            plugins: {
-                legend: {
-                    position: "top",
-                    labels: {
-                        color: "#6a6d7f",
-                        font: {
-                            family: "Ubuntu",
-                            size: 12,
-                            weight: "lighter"
-                        },
-                        pointStyle: "rectRounded",
-                        usePointStyle: true
-                    }
-                },
-                tooltip: {
-                    backgroundColor: "#fff",
-                    bodyColor: "#2b2e4a",
-                    bodyFont: {
-                        family: "Ubuntu",
-                        size: 14,
-                        weight: "lighter"
-                    },
-                    titleColor: "#2b2e4a",
-                    titleFont: {
-                        family: "Ubuntu",
-                        size: 16,
-                        weight: "bold"
-                    },
-                    boxPadding: 5,
-                    displayColors: false,
-                    usePointStyle: true,
-                    padding: {
-                        x: 20,
-                        y: 10
-                    },
-                    borderWidth: 1,
-                    borderColor: "rgba(43,46,74,0.25)",
-                    callbacks: {
-                        label(item: TooltipItem<any>): string {
-                            return item.dataset.label + `: ${ctx.accountCurrency.symbol}${Math
-                                .max(0, item.parsed as number)
-                                .toFixed(ctx.accountCurrency.decimals)}`;
-                        }
-                    }
-                }
+        const conf = doughnutConfig;
+        doughnutConfig.animation = {
+            animateRotate: this.animation
+        };
+        doughnutConfig.plugins!.tooltip!.callbacks = {
+            label(item: TooltipItem<any>): string {
+                return item.dataset.label + `: ${ctx.accountCurrency.symbol}${Math
+                    .max(0, item.parsed as number)
+                    .toFixed(ctx.accountCurrency.decimals)}`;
             }
         };
+        return conf;
     }
 
     coins: Coin[];
@@ -106,27 +60,29 @@ export class OverviewComponent implements OnInit {
 
     constructor(private wallet: WalletService,
                 private currencyService: CurrencyService,
-                private http: HttpClient) {}
+                private http: HttpClient) {
+    }
 
-    private getPortfolioValueChange(coins: Coin[], balances: BigNumber[]) {
+    getPortfolioValueChange(coins: Coin[], balances: BigNumber[]) {
         return this.http.get<Array<{
             symbol: string,
             openPrice: string | BigNumber,
             lastPrice: string | BigNumber,
             coin: Coin
         }>>(`${server}/res/statistics`, {
-            context: new HttpContext().set(CSRF, false)
+            // context: new HttpContext().set(CSRF, false)
         }).pipe(map(changes => {
             changes.map(change => {
                 change.openPrice = new BigNumber(change.openPrice);
                 change.lastPrice = new BigNumber(change.lastPrice);
-                const coin = coins.find(c => c.shortName.toUpperCase() == change.symbol);
+                const coin = this.currencyService.findCoinByShortName(change.symbol);
                 if (!coin) throw new Error("Coin not found");
                 change.coin = coin;
                 return change;
             });
             const [openPrice, lastPrice] = balances.map((balance, i) => {
-                const change = changes.find(c => c.coin == coins[i]);
+                const change = changes.find(c =>
+                    c.coin.shortName.toLowerCase() == coins[i].shortName.toLowerCase());
                 if (!change) throw new Error("Unknown error");
                 return [balance.multipliedBy(change.openPrice), balance.multipliedBy(change.lastPrice)];
             }).reduce(([a1, b1], [a2, b2]) => [a1.plus(b1), a2.plus(b2)]);
@@ -134,23 +90,22 @@ export class OverviewComponent implements OnInit {
         }))
     }
 
-    renew(start?: number): Observable<void> {
+    renew(start ?: number): Observable<void> {
         const res = new Subject<void>();
         if (!start) start = new Date().getTime();
         forkJoin(this.coins.map(c => this.wallet.getBalance(c).pipe(take(1))))
             .subscribe(balances => {
                 forkJoin([...balances.map(((balance, i) =>
-                    this.currencyService.transfer(balance, this.coins[i], this.accountCurrency).pipe(take(1)))),
+                    this.currencyService.transfer(balance.available, this.coins[i], this.accountCurrency).pipe(take(1)))),
                 ]).subscribe(fiatBalances => {
-                    this.getPortfolioValueChange(this.coins, balances)
+                    this.getPortfolioValueChange(this.coins, balances.map(b => b.available))
                         .subscribe(v => this.valueChange = v);
                     const delta = new Date().getTime() - (start || new Date(0).getTime());
                     setTimeout(() => {
                         this.loading = false;
-                        this.chartSettings.plugins!.tooltip!.callbacks = {
-                        };
+                        this.chartSettings.plugins!.tooltip!.callbacks = {};
                         const hasNonNullBalance = !!fiatBalances.find(balance =>
-                            balance.comparedTo(new BigNumber("0")) > 0);
+                            balance.comparedTo(new BigNumber("0"))! > 0);
                         this.chartData = {
                             datasets: [{
                                 label: "Amount",
@@ -168,15 +123,11 @@ export class OverviewComponent implements OnInit {
     }
 
     ngOnInit() {
-        let start = new Date().getTime();
-        forkJoin([
-            this.currencyService.getCoins().pipe(take(1)),
-            this.currencyService.getAccountCurrency().pipe(take(1))
-        ]).subscribe(async ([coins, accountCurrency]) => {
-            this.coins = coins;
+        const start = new Date().getTime();
+        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(async (accountCurrency) => {
+            this.coins = this.currencyService.getCoins();
             this.accountCurrency = accountCurrency;
 
-            console.log("init")
             this.renew(start);
 
             const silentRenew = async () => {
@@ -184,7 +135,7 @@ export class OverviewComponent implements OnInit {
                 this.renew();
                 await sleep(100);
                 this.animation = true;
-            }
+            };
 
             this.coins.forEach(coin => this.wallet.onBalanceChange(coin).pipe(skip(2))
                 .subscribe(_ => {

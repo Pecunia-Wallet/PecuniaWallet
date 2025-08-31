@@ -9,6 +9,7 @@ import {MarqueeComponent} from "../../marquee/marquee.component";
 import {AuthService} from "../../../services/auth.service";
 import {NotifyService} from "../../../services/notify.service";
 import {Router} from "@angular/router";
+import {WalletService} from "../../../services/wallet.service";
 
 @Component({
     selector: 'app-lock',
@@ -31,10 +32,11 @@ export class LockComponent extends CodeComponent {
     constructor(ref: ElementRef,
                 http: HttpClient,
                 sanitizer: DomSanitizer,
-                protected auth: AuthService,
+                auth: AuthService,
                 private notify: NotifyService,
-                private router: Router) {
-        super(ref, sanitizer, http);
+                private router: Router,
+                private wallet: WalletService) {
+        super(ref, sanitizer, http, auth);
     }
 
     override showFooter(): boolean {

@@ -36,7 +36,7 @@ export class ErrorComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.wallet.currentCoin(this.route).subscribe(coin => this.coin = coin!);
+        this.coin = this.wallet.currentCoin(this.route)!;
     }
 
     edit() {

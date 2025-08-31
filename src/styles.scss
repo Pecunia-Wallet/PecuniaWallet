@@ -1,10 +1,11 @@
 @use "variables" as *;
 @use "reset";
 @use "lib";
+@use "@ngxpert/hot-toast/src/styles/styles.scss";
 
 :root {
-    font-family: "Ubuntu", sans-serif;
     color: $blue-darker;
+    --hot-toast-close-btn-height: 1.1em;
 }
 
 @mixin shine {
@@ -19,6 +20,78 @@
 
 .shine {
     @include shine;
+}
+
+.sync {
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    width: 187px;
+
+    &-logo-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin-left: 10px;
+    }
+
+    &-title {
+        font-weight: 700;
+        padding-right: 10px;
+    }
+}
+
+.v-loader {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    width: fit-content;
+    height: 35px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    opacity: 0;
+    transition: opacity .15s ease-in-out;
+
+    span {
+        display: inline-block;
+        width: 10px;
+        //height: 15px;
+        border-radius: 15px;
+        background-color: fade-out($blue-darker, .3);
+        height: 35px;
+        transform: translateY(25px);
+
+        &:nth-child(1) {
+            animation: loadingA 1.5s 1s infinite;
+        }
+
+        &:nth-child(2) {
+            animation: loadingA 1.5s 0.5s infinite;
+        }
+
+        &:nth-child(3) {
+            animation: loadingA 1.5s 0s infinite;
+        }
+
+    }
+}
+
+@keyframes loadingA {
+    0% {
+        transform: translateY(25px);
+    }
+    50% {
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(25px);
+    }
 }
 
 @keyframes placeholderShimmer {

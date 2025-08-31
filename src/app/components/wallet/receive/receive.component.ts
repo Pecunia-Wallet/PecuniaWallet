@@ -5,22 +5,22 @@ import {ActivatedRoute, RouterLink} from "@angular/router";
 import {Coin} from "../../../models/Coin";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {
-    faArrowLeft, faCopy,
+    faCopy,
     faChevronLeft,
     faChevronRight, faInfo, faLongArrowAltDown,
-    faLongArrowDown,
     faShareNodes
 } from "@fortawesome/free-solid-svg-icons";
-import {NgxQrcodeStylingComponent, NgxQrcodeStylingModule, Options} from "ngx-qrcode-styling";
+import {NgxQrcodeStylingComponent, Options} from "ngx-qrcode-styling";
 import {forkJoin, Observable, take, tap} from "rxjs";
-import {JsonPipe, NgSwitch, NgSwitchCase} from "@angular/common";
-import {NgVarDirective} from "../../../directives/ng-var.directive";
-import {faClipboard} from "@fortawesome/free-regular-svg-icons";
-import {NotifyService} from "../../../services/notify.service";
-import {DomSanitizer} from "@angular/platform-browser";
+import {NgSwitch, NgSwitchCase} from "@angular/common";
 import {WalletHeaderComponent} from "../wallet-header/wallet-header.component";
 import {BundleService} from "../../../services/bundle.service";
 import {getCoinName} from "../../../app.config";
+import {HotToastService} from "@ngxpert/hot-toast";
+import {Ripple} from "primeng/ripple";
+import {AddressBag} from "wallet-sensitive/dist";
+import _default from "chart.js/dist/plugins/plugin.tooltip";
+import type = _default.defaults.animations.numbers.type;
 
 interface Address {
     value: string;
@@ -34,12 +34,11 @@ interface Address {
         LoaderComponent,
         FaIconComponent,
         RouterLink,
-        NgxQrcodeStylingModule,
-        JsonPipe,
         NgSwitch,
         NgSwitchCase,
-        NgVarDirective,
-        WalletHeaderComponent
+        WalletHeaderComponent,
+        Ripple,
+        NgxQrcodeStylingComponent
     ],
     templateUrl: "./receive.component.html",
     styleUrl: "./receive.component.scss"
@@ -49,7 +48,7 @@ export class ReceiveComponent implements AfterViewInit {
     @ViewChild("qr") qr: NgxQrcodeStylingComponent;
     @ViewChild("qrContainer") qrContainer: ElementRef;
 
-    qrConfig: Options = {
+    readonly qrConfig: Options = {
         width: 328,
         height: 328,
         margin: 0,
@@ -69,6 +68,14 @@ export class ReceiveComponent implements AfterViewInit {
         }
     };
 
+    readonly addressOrder = [
+        "tr",
+        "wpkh",
+        "wsh",
+        "sh",
+        "pkh"
+    ];
+
     loading = true;
     coin: Coin;
     addresses: Address[] = [];
@@ -76,9 +83,8 @@ export class ReceiveComponent implements AfterViewInit {
 
     constructor(private wallet: WalletService,
                 private route: ActivatedRoute,
-                private notify: NotifyService,
-                private sanitizer: DomSanitizer,
-                private bundle: BundleService) {
+                private bundle: BundleService,
+                private toast: HotToastService) {
         this.restoreState();
     }
 
@@ -108,34 +114,33 @@ export class ReceiveComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        this.wallet.currentCoin(this.route).subscribe(coin => {
-            this.coin = coin!;
-            this.wallet.getCoinInfo(coin!).subscribe(info => {
-                const addresses = forkJoin(info.addressTypes
-                    .map(type => this.wallet.getAddress(coin!, type).pipe(take(1))));
-                addresses.subscribe(addresses => {
-                    this.addresses = addresses.map((address, i) => {
-                        return {
-                            value: address,
-                            type: info.addressTypes[i]
-                        }
-                    });
-                    this.addresses = this.addresses.sort(((a1, a2) => {
-                        if (a1.type == info.defaultAddressType) return -1;
-                        if (a2.type == info.defaultAddressType) return 1;
-                        return 0;
-                    }));
-                    this.updateQr().subscribe(_ => this.loading = false);
-                })
-            });
-        });
+        this.coin = this.wallet.currentCoin(this.route)!;
+        const addresses: Observable<AddressBag> = this.wallet.getAddresses(this.coin!).pipe(take(1));
+        addresses.subscribe(addresses => {
+            this.addresses = Object.entries(addresses)
+                .map(([type, address]) => ({
+                    value: address as string,
+                    type: type as string
+                }))
+                .sort((a1: Address, a2: Address) => {
+                    const i1 = this.addressOrder.indexOf(a1.type.toLowerCase());
+                    const i2 = this.addressOrder.indexOf(a2.type.toLowerCase());
+
+                    if (i1 == i2) return 0;
+                    if (i1 == -1 && i2 != -1) return 1;
+                    if (i2 == -1) return -1;
+
+                    return i1 - i2;
+                });
+            this.updateQr().subscribe(_ => this.loading = false);
+        })
     }
 
     prev() {
         const prev = Math.max(0, this.currentAddressIndex - 1);
         if (prev != this.currentAddressIndex) {
             this.currentAddressIndex = prev;
-            this.bundle.saveInstance(this.uid, { addressIndex: prev });
+            this.bundle.saveInstance(this.uid, {addressIndex: prev});
             this.updateQr().subscribe();
         }
     }
@@ -144,22 +149,16 @@ export class ReceiveComponent implements AfterViewInit {
         const next = Math.min(this.addresses.length - 1, this.currentAddressIndex + 1);
         if (next != this.currentAddressIndex) {
             this.currentAddressIndex = next;
-            this.bundle.saveInstance(this.uid, { addressIndex: next });
+            this.bundle.saveInstance(this.uid, {addressIndex: next});
             this.updateQr().subscribe();
         }
     }
 
     copy() {
-        navigator.clipboard.writeText(this.currentAddress!.value).then(() => {
-            this.notify.notification$.next({
-                title: "",
-                text: this.sanitizer.bypassSecurityTrustHtml(`
-                    <span style="font-weight: 500;font-size: 20px;text-align: left">
-                        Address copied
-                    </span>
-                `),
-                icon: faClipboard,
-                hideAfter: 2000
+        const addr = this.currentAddress!.value;
+        navigator.clipboard.writeText(addr).then(() => {
+            this.toast.info("Copied to clipboard!", {
+                id: `address${addr}Copied`
             });
         });
     }
@@ -174,9 +173,11 @@ export class ReceiveComponent implements AfterViewInit {
         }
         if (this.coin.shortName.toLowerCase() == "btc") {
             switch (this.currentAddress?.type?.toLowerCase()) {
+                case "sh": // fallthrough
                 case "pkh":
                     page = "/Invoice_address";
                     break;
+                case "wsh": // fallthrough
                 case "wpkh":
                     page = "/Segregated_Witness";
             }

@@ -19,6 +19,8 @@ import {IdentityService} from "../../../../services/identity.service";
 import {catchError, of} from "rxjs";
 import {FeeEditorComponent} from "../fee-editor.component";
 import {faCloudArrowDown} from "@fortawesome/free-solid-svg-icons";
+import {Select} from "primeng/select";
+import {CurrencyService} from "../../../../services/currency.service";
 
 @Component({
     selector: "app-import-step-fee",
@@ -35,20 +37,22 @@ import {faCloudArrowDown} from "@fortawesome/free-solid-svg-icons";
         InputComponent,
         FaIconComponent,
         ApplyDirective,
-        TitleCasePipe
+        TitleCasePipe,
+        Select
     ],
     templateUrl: "../fee-editor.component.html",
     styleUrl: "../fee-editor.component.scss"
 })
 export class ImportStepFeeComponent extends FeeEditorComponent {
 
-    constructor(broker: BrokerService,
+    constructor(currencyService: CurrencyService,
+                broker: BrokerService,
                 bundle: BundleService,
                 wallet: WalletService,
                 route: ActivatedRoute,
                 router: Router,
                 id: IdentityService) {
-        super(broker, bundle, wallet, route, router, id);
+        super(currencyService, broker, bundle, wallet, route, router, id);
     }
 
     override get uid() {

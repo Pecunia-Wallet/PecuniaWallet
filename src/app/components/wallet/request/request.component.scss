@@ -28,9 +28,10 @@
     }
 }
 
-@media (max-width: 425px) {
+@media (max-width: 475px) {
     .row {
-        justify-content: center;
+        justify-content: space-between;
+        gap: unset;
 
         &:nth-child(2) {
             justify-content: center;

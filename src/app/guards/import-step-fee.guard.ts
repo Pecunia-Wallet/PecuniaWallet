@@ -7,7 +7,6 @@ export const importStepFeeGuard: CanActivateFn = (route, state) => {
     const router = inject(Router);
 
     const keys = !!broker.data?.import?.keys;
-    console.log(broker.data, broker.data?.import, keys)
     if (!keys) router.navigate(["/wallet/coin/import"], {
         queryParamsHandling: "merge"
     });

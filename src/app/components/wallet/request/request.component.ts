@@ -11,7 +11,7 @@ import {
     faShareNodes
 } from "@fortawesome/free-solid-svg-icons";
 import {WalletHeaderComponent} from "../wallet-header/wallet-header.component";
-import {NgxQrcodeStylingComponent, NgxQrcodeStylingModule, Options} from "ngx-qrcode-styling";
+import {NgxQrcodeStylingComponent, Options} from "ngx-qrcode-styling";
 import {WalletService} from "../../../services/wallet.service";
 import {Coin} from "../../../models/Coin";
 import {Observable} from "rxjs";
@@ -21,6 +21,8 @@ import {NotifyService} from "../../../services/notify.service";
 import BigNumber from "bignumber.js";
 import {NgIf} from "@angular/common";
 import {dp} from "../../../app.config";
+import {HotToastService} from "@ngxpert/hot-toast";
+import {Ripple} from "primeng/ripple";
 
 @Component({
     selector: "app-request",
@@ -30,13 +32,14 @@ import {dp} from "../../../app.config";
         RouterLink,
         LoaderComponent,
         WalletHeaderComponent,
-        NgxQrcodeStylingModule,
-        NgIf
+        NgIf,
+        Ripple,
+        NgxQrcodeStylingComponent
     ],
     templateUrl: "./request.component.html",
     styleUrl: "./request.component.scss"
 })
-export class RequestComponent implements AfterViewInit {
+export class RequestComponent implements OnInit, AfterViewInit {
 
     @ViewChild("qr") qr: NgxQrcodeStylingComponent;
 
@@ -66,9 +69,9 @@ export class RequestComponent implements AfterViewInit {
 
     constructor(private wallet: WalletService,
                 private route: ActivatedRoute,
-                private sanitizer: DomSanitizer,
-                private notify: NotifyService,
-                private router: Router) {}
+                private router: Router,
+                private toast: HotToastService) {
+    }
 
     renderQr(): Observable<void> {
         return this.qr.update(this.qrConfig, {
@@ -76,26 +79,20 @@ export class RequestComponent implements AfterViewInit {
         });
     }
 
+    ngOnInit() {
+        this.coin = this.wallet.currentCoin(this.route)!;
+    }
+
     ngAfterViewInit() {
-        this.wallet.currentCoin(this.route).subscribe(coin => {
-            this.coin = coin!;
-            this.renderQr().subscribe(() => {
-                this.loading = false;
-            });
+        this.renderQr().subscribe(() => {
+            this.loading = false;
         });
     }
 
     copy() {
         navigator.clipboard.writeText(this.request!).then(() => {
-            this.notify.notification$.next({
-                title: "",
-                text: this.sanitizer.bypassSecurityTrustHtml(`
-                    <span style="font-weight: 500;font-size: 20px;text-align: left">
-                        Request copied
-                    </span>
-                `),
-                icon: faClipboard,
-                hideAfter: 2000
+            this.toast.info("Copied to clipboard!", {
+                id: "requestCopied"
             });
         });
     }
@@ -141,8 +138,6 @@ export class RequestComponent implements AfterViewInit {
         return request;
     }
 
-    protected readonly faArrowLeft = faArrowLeft;
-    protected readonly faLongArrowAltDown = faLongArrowAltDown;
     protected readonly faCopy = faCopy;
     protected readonly faShareNodes = faShareNodes;
     protected readonly faInfo = faInfo;

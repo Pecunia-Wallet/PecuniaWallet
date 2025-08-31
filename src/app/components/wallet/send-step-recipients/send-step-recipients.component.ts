@@ -1,4 +1,12 @@
-import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    OnDestroy,
+    OnInit,
+    ViewChild
+} from "@angular/core";
 import {WalletHeaderComponent} from "../wallet-header/wallet-header.component";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {
@@ -17,13 +25,15 @@ import {BundleService} from "../../../services/bundle.service";
 import {Coin} from "../../../models/Coin";
 import {FiatCurrency} from "../../../models/FiatCurrency";
 import {ActivatedRoute, Router} from "@angular/router";
-import {TransactionOutputs, WalletService} from "../../../services/wallet.service";
 import {CurrencyService} from "../../../services/currency.service";
-import {forkJoin, map, Observable, of, ReplaySubject, take} from "rxjs";
+import {forkJoin, map, Observable, of, ReplaySubject, Subscription, take} from "rxjs";
 import {LoaderComponent} from "../loader/loader.component";
 import BigNumber from "bignumber.js";
 import {validate} from "multicoin-address-validator";
 import {BrokerService} from "../../../services/broker.service";
+import {WindowComponent} from "../../window/window.component";
+import {TransactionOutputs, WalletService} from "../../../services/wallet.service";
+import {Currency} from "../../../models/Currency";
 
 interface Recipient {
     form: FormGroup;
@@ -33,10 +43,10 @@ interface Recipient {
 
 export function bindAmountChanges(currencyService: CurrencyService,
                                   form: FormGroup, sourceName: string, targetName: string,
-                                  sourceCurrency: Coin | FiatCurrency,
-                                  targetCurrency: Coin | FiatCurrency) {
+                                  sourceCurrency: Currency,
+                                  targetCurrency: Currency) {
     const target = form.get(targetName);
-    form.get(sourceName)?.valueChanges.subscribe(amountChange => {
+    return form.get(sourceName)?.valueChanges.subscribe(amountChange => {
         if (!amountChange) {
             target?.setValue("", {emitEvent: false});
             return;
@@ -50,7 +60,7 @@ export function bindAmountChanges(currencyService: CurrencyService,
             .subscribe(transferred => {
                 target?.setValue(dp(transferred, targetCurrency.decimals), {emitEvent: false});
             });
-    });
+    }) || Subscription.EMPTY;
 }
 
 @Component({
@@ -72,7 +82,6 @@ export function bindAmountChanges(currencyService: CurrencyService,
     styleUrl: "./send-step-recipients.component.scss"
 })
 export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDestroy {
-
     readonly MAX_RECIPIENTS = 25;
 
     @ViewChild("func") funcElem: ElementRef;
@@ -85,6 +94,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     currency: FiatCurrency;
     balance: BigNumber;
 
+    amountChangeSubs: Subscription[] = [];
     recipients: Recipient[] = [];
     currentIndex = 0;
 
@@ -94,9 +104,10 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     constructor(private bundle: BundleService,
                 private route: ActivatedRoute,
                 private router: Router,
-                private wallet: WalletService,
                 private currencyService: CurrencyService,
-                private broker: BrokerService) {}
+                private broker: BrokerService,
+                private wallet: WalletService,
+                protected _window: WindowComponent) {}
 
     get uid() {
         return `Wallet/Send/Recipients ${getCoinName(this.route)}`;
@@ -132,12 +143,9 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     ngOnInit() {
-        forkJoin([
-            this.wallet.currentCoin(this.route).pipe(take(1)),
-            this.currencyService.getAccountCurrency().pipe(take(1))
-        ]).subscribe(async ([coin, currency]) => {
+        this.coin = this.wallet.currentCoin(this.route)!;
+        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(async (currency) => {
                 const callback = () => {
-                    this.coin = coin!;
                     this.currency = currency;
 
                     this.viewTaskQueue.next(async () => {
@@ -162,18 +170,34 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
 
                         if (this.recipients.length == 0) this.addRecipient();
 
+                        this.recipients.forEach(recipient => {
+                            try {
+                                const amount = new BigNumber(recipient.form.get("amountCoins")?.value);
+                                this.currencyService.transfer(amount, this.coin, currency!)
+                                    .subscribe(transferred => {
+                                        recipient.form.get("amountFiat")!.setValue(dp(transferred, currency.decimals), {emitEvent: false});
+                                    });
+                            } catch (e) {
+                                console.error(e);
+                            }
+                            this.amountChangeSubs.push(bindAmountChanges(this.currencyService, recipient.form,
+                                "amountCoins", "amountFiat", this.coin, currency!));
+                            this.amountChangeSubs.push(bindAmountChanges(this.currencyService, recipient.form,
+                                "amountFiat", "amountCoins", currency!, this.coin));
+                        });
                     });
 
                     return void 0;
                 };
+
                 forkJoin([
-                    this.wallet.getBalance(coin!).pipe(take(1)),
+                    this.wallet.getBalance(this.coin).pipe(take(1)),
                     of(callback()).pipe(take(1))
                 ]).subscribe(([balance]) => {
-                    this.balance = balance;
+                    this.balance = balance.available;
                     this.initializing = false;
                 });
-                this.wallet.onBalanceChange(coin!).subscribe(b => this.balance = b);
+                this.wallet.onBalanceChange(this.coin).subscribe(b => this.balance = b.available);
             }
         );
     }
@@ -185,6 +209,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     ngOnDestroy() {
         this.viewTaskQueue.complete();
         this.viewTaskQueue = null as any;
+        this.amountChangeSubs.forEach(sub => sub.unsubscribe());
     }
 
     checkAddresses() {
@@ -215,16 +240,11 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
         }
     }
 
-    get currentRecipient()
-        :
-        Recipient | undefined {
+    get currentRecipient(): Recipient | undefined {
         return this.recipients[this.currentIndex];
     }
 
-    subscribeOnChanges(recipient
-                           :
-                           Recipient
-    ) {
+    subscribeOnChanges(recipient: Recipient) {
         recipient.form.valueChanges.subscribe(_ => {
             this.saveState();
             if (recipient.form.touched &&
@@ -234,14 +254,14 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
         });
     }
 
-    addRecipient(address ?: string, amount ?: BigNumber) {
+    addRecipient(address?: string, amount?: BigNumber) {
         if (this.recipients.length >= this.MAX_RECIPIENTS) return;
         const recipient = {
             form: new FormGroup({
                 address: new FormControl(address || "", [Validators.required]),
                 amountCoins: new FormControl("", [
                     Validators.required, v => {
-                        const ok = new BigNumber(v.value).comparedTo(0) > 0;
+                        const ok = new BigNumber(v.value).comparedTo(0)! > 0;
                         if (!ok) return {nonPositive: true};
                         else return null;
                     }]),
@@ -250,17 +270,17 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
             element: null as any
         };
         this.subscribeOnChanges(recipient);
-        bindAmountChanges(this.currencyService, recipient.form,
-            "amountCoins", "amountFiat", this.coin!, this.currency!);
-        bindAmountChanges(this.currencyService, recipient.form,
-            "amountFiat", "amountCoins", this.currency!, this.coin!);
+        this.amountChangeSubs.push(bindAmountChanges(this.currencyService, recipient.form,
+            "amountCoins", "amountFiat", this.coin!, this.currency!));
+        this.amountChangeSubs.push(bindAmountChanges(this.currencyService, recipient.form,
+            "amountFiat", "amountCoins", this.currency!, this.coin!));
         recipient.form.get("amountCoins")!.setValue(amount ? dp(amount, this.coin.decimals) : "");
         if (address || amount) recipient.form.markAllAsTouched();
         this.recipients.push(recipient);
     }
 
     @HostListener("document:keydown.arrowRight", ["$event"])
-    next(event ?: KeyboardEvent) {
+    next(event?: KeyboardEvent) {
         if (event && (event.target as HTMLElement).tagName == "INPUT") return;
         if (this.currentIndex >= this.recipients.length ||
             this.currentIndex >= this.MAX_RECIPIENTS - 1) return;
@@ -281,7 +301,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     @HostListener("document:keydown.arrowLeft", ["$event"])
-    prev(event ?: KeyboardEvent) {
+    prev(event?: KeyboardEvent) {
         if (event && (event.target as HTMLElement).tagName == "INPUT") return;
         if (this.currentIndex <= 0) return;
         blur();
@@ -328,11 +348,10 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
             if (!this.valid || insufficientMoney) return;
             this.checkAddresses();
             if (!this.valid) return;
-            let recipients: TransactionOutputs = {};
+            const recipients: TransactionOutputs = {};
             for (const recipient of this.recipients) {
                 const address = recipient.form.get("address")!.value;
-                const amount = new BigNumber(recipient.form.get("amountCoins")!.value);
-                recipients[address] = amount;
+                recipients[address] = new BigNumber(recipient.form.get("amountCoins")!.value);
             }
             this.broker.data.sendData = {
                 recipients: recipients
@@ -353,10 +372,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     @HostListener("document:focusout", ["$event"])
-    focusOut(event
-                 :
-                 FocusEvent
-    ) {
+    focusOut(event: FocusEvent) {
         if ((event?.target as HTMLElement).tagName != "INPUT") return;
         if ((event?.relatedTarget as HTMLElement)?.tagName == "INPUT") return;
         this.recipients.forEach((r, i) => {
@@ -375,10 +391,7 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
         this.saveState();
     }
 
-    isAddressRepeating(r
-                           :
-                           Recipient
-    ) {
+    isAddressRepeating(r: Recipient) {
         const addr = r.form.get("address")!.value;
         if (addr == "") return false;
         return !!this.recipients
@@ -387,7 +400,8 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     get valid() {
-        return !this.recipients.find(r => r.form.invalid && !this.isEmpty(r)) &&
+        return this.recipients.length > 0 &&
+            !this.recipients.find(r => r.form.invalid && !this.isEmpty(r)) &&
             this.recipients.find(r => r.form.valid) &&
             !this.recipients.find(r => r.addressValid == false) &&
             !this.recipients.find(r => this.isAddressRepeating(r));
@@ -406,21 +420,14 @@ export class SendStepRecipientsComponent implements OnInit, AfterViewInit, OnDes
             .length;
     }
 
-    get insufficientMoney()
-        :
-        Observable<boolean> {
-        if (!
-            this.coin
-        )
-            return of(true);
+    get insufficientMoney(): Observable<boolean> {
+        if (!this.coin) return of(true);
+
         return this.wallet.getBalance(this.coin).pipe(take(1), map(
-            balance => this.totalAmount.comparedTo(balance) > 0));
+            balance => this.totalAmount.comparedTo(balance.available)! > 0));
     }
 
-    isEmpty(r
-                :
-                Recipient
-    ) {
+    isEmpty(r: Recipient) {
         return r.form.get("address")!.value == "" && r.form.get("amountCoins")!.value == "";
     }
 

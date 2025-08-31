@@ -59,25 +59,27 @@ export class RequestReaderComponent implements OnInit {
                 private route: ActivatedRoute,
                 private bundle: BundleService,
                 private router: Router,
-                private broker: BrokerService) {}
+                private broker: BrokerService) {
+    }
 
     get uid() {
         return `Wallet/Request/Read:${getCoinName(this.route)}`;
     }
 
     ngOnInit() {
-        this.wallet.currentCoin(this.route).subscribe(coin => {
-            this.coin = coin!;
-            this.loading = false;
-        });
+        this.coin = this.wallet.currentCoin(this.route)!;
+        this.loading = false;
 
         this.request.valueChanges.subscribe(v => {
-            this.request.setValue((v || "").trim(), { emitEvent: false });
+            this.request.setValue((v || "").trim(), {emitEvent: false});
             this.bundle.saveInstance(this.uid, {
                 request: this.request.value
             });
             this.parseRequest(this.request.value);
         });
+
+        const param = decodeURIComponent(new URLSearchParams(window.location.search).get("uri") ?? "");
+        if (param) this.request.setValue(param);
 
         const savedInstance = this.bundle.getSavedInstance(this.uid);
         if (savedInstance?.request) {
@@ -88,7 +90,7 @@ export class RequestReaderComponent implements OnInit {
 
     parseRequest(request?: string | null) {
         if (!request) request = this.request.value;
-        if (!request) return (this.parsed = {}) as unknown as void;
+        if (!request) return (this.parsed = {}) as any;
 
         this.parsed = this.parseBitcoinUri(request);
     }
@@ -134,7 +136,10 @@ export class RequestReaderComponent implements OnInit {
         }
 
         if (amount) {
-            try { amount = this.parseAmount(amount) as any; } catch (_) {}
+            try {
+                amount = this.parseAmount(amount) as any;
+            } catch (_) {
+            }
             if (!amount || !(amount as any instanceof BigNumber)) error["invalidAmount"] = true;
         }
         return {...error, network, address, amount, label, message};

@@ -6,18 +6,23 @@
     <div class="sliders">
         <div class="slider-group" *ngIf="_rawSliderOptions">
             <div class="slider-group__title">
-                <app-dropdown class="dropdown" [items]="availableFeeUnits"
-                              [(selected)]="feeUnits" [disabled]="loading"
-                              (selectedChange)="feeUnitsChange()"/>
-                :
+                <p-select [options]="availableFeeUnits" optionLabel="text"
+                              [(ngModel)]="feeUnits" [disabled]="loading"
+                              (onChange)="feeUnitsChange()">
+                    <ng-template let-opt #item>
+                        <div class="opt">
+                            {{opt.text.split("/")[0]}}<span>/</span>{{opt.text.split("/")[1]}}
+                        </div>
+                    </ng-template>
+                </p-select>
             </div>
             <ngx-slider [options]="_rawSliderOptions"
-                        [(value)]="feePerKb" (userChange)="setBlocksFromFee()" />
+                        [(value)]="feePerKb" (userChangeEnd)="setBlocksFromFee()" />
         </div>
         <div class="slider-group" *ngIf="_blocksSliderOptions">
             <span class="slider-group__title">Blocks:</span>
             <ngx-slider [options]="_blocksSliderOptions"
-                        [(value)]="blocks" (userChange)="setFeeFromBlocks()" />
+                        [(value)]="blocks" (userChangeEnd)="setFeeFromBlocks()" />
         </div>
     </div>
     <div class="input-group" *ngIf="feeUnits">

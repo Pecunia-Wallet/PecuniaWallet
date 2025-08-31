@@ -4,7 +4,7 @@
 .content {
     display: flex;
     flex-direction: column;
-    margin-top: 30px;
+    margin-top: 50px;
     max-width: 400px;
     gap: 25px;
 }
@@ -18,22 +18,17 @@
 }
 
 .message {
-    display: flex;
-    gap: 20px;
     font-size: 20px;
     letter-spacing: .05em;
-    align-items: center;
+    font-weight: 300;
     text-align: justify;
-
-    fa-icon {
-        font-size: 35px;
-    }
 }
 
 .options {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 15px;
+    margin-top: 50px;
 }
 
 .option {

@@ -2,3 +2,7 @@
     $header: ":host",
     $main: none
 );
+
+:host.mobile {
+    padding-top: 20px !important;
+}

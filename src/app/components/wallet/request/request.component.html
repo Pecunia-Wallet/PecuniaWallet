@@ -1,7 +1,7 @@
 <app-loader [show]="loading"/>
 
 <app-wallet-header title="Funds request" link="/wallet/coin/request/build"
-                   [params]="{ amount: null, label: null, message: null, restore: null }" />
+                   [params]="{ amount: null, label: null, request: null, restore: null }" />
 
 <div class="content">
     <div class="row">
@@ -26,17 +26,17 @@
     </div>
     <div class="row">
         <div class="controls">
-            <button class="control" (click)="copy()">
-                <fa-icon [icon]="faCopy"/>
+            <button pRipple class="control" (click)="copy()">
+                <fa-icon [icon]="faCopy" />
             </button>
-            <button class="control" (click)="share()">
-                <fa-icon [icon]="faShareNodes"/>
+            <button pRipple class="control" (click)="share()">
+                <fa-icon [icon]="faShareNodes" />
             </button>
             <a class="control" target="_blank" href="https://github.com/bitcoin/bips/blob/master/bip-0020.mediawiki">
-                <fa-icon [icon]="faInfo"/>
+                <fa-icon [icon]="faInfo" />
             </a>
         </div>
-        <button class="button" (click)="edit()">
+        <button pRipple class="button" (click)="edit()">
             Edit request
             <fa-icon [icon]="faPenToSquare" />
         </button>

@@ -56,13 +56,13 @@ export class MenuComponent implements OnInit {
         this.coins.forEach(coin => this.wallet
             .getBalance(coin)
             .subscribe(balance => {
-                this.currencyService.transfer(balance, coin, this.accountCurrency)
+                this.currencyService.transfer(balance.available, coin, this.accountCurrency)
                     .subscribe(fiatBalance => res$.next([
                         ...res$.value,
                         {
                             coin: coin,
                             fiat: this.accountCurrency,
-                            coinBalance: balance,
+                            coinBalance: balance.available,
                             fiatBalance: fiatBalance
                         }
                     ]));
@@ -77,14 +77,11 @@ export class MenuComponent implements OnInit {
     }
 
     ngOnInit() {
-        forkJoin([
-            this.currencyService.getCoins().pipe(first()),
-            this.currencyService.getAccountCurrency().pipe(first())
-        ]).subscribe(([coins, accountCurrency]) => {
-            this.coins = coins;
+        this.currencyService.getAccountCurrency().pipe(first()).subscribe((accountCurrency) => {
+            this.coins = this.currencyService.getCoins();
             this.accountCurrency = accountCurrency;
-            forkJoin(coins.map(coin => this.wallet.getBalance(coin))).subscribe(_ => {
-                coins.forEach(coin => this.wallet.onBalanceChange(coin).subscribe(() => this.renew()));
+            forkJoin(this.coins.map(coin => this.wallet.getBalance(coin))).subscribe(_ => {
+                this.coins.forEach(coin => this.wallet.onBalanceChange(coin).subscribe(() => this.renew()));
                 this.renew();
             });
             let rates: Rate[] | null = null;

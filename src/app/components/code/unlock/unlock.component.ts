@@ -15,6 +15,7 @@ import {take, takeLast} from "rxjs";
 import {CookieService} from "ngx-cookie-service";
 import {server} from "../../../app.config";
 import {AppComponent} from "../../../app.component";
+import {WalletService} from "../../../services/wallet.service";
 
 @Component({
     selector: 'app-unlock',
@@ -40,9 +41,16 @@ export class UnlockComponent extends CodeComponent {
     constructor(ref: ElementRef,
                 http: HttpClient,
                 sanitizer: DomSanitizer,
-                private auth: AuthService,
-                private cookies: CookieService) {
-        super(ref, sanitizer, http);
+                auth: AuthService,
+                private cookies: CookieService,
+                private wallet: WalletService) {
+        super(ref, sanitizer, http, auth);
+        try {
+            const lastAttempt = localStorage.getItem("lastTryTime");
+            if (lastAttempt && Date.now() - +lastAttempt > 300000) return;
+            this.tries = +(localStorage.getItem("unlockTries") || 0);
+            this.setErrorMessage();
+        } catch (_) { /* empty */ }
     }
 
     override header(): SafeHtml {
@@ -55,22 +63,35 @@ export class UnlockComponent extends CodeComponent {
         this.auth.restoreAuth(pin).subscribe(auth => {
             if (!auth) {
                 if (++this.tries >= this.MAX_TRIES) {
-                    for (let cookieName of Object.keys(this.cookies.getAll())) {
+                    for (const cookieName of Object.keys(this.cookies.getAll())) {
                         this.cookies.set(cookieName, "", {
                             expires: new Date(0),
                             path: "/"
                         });
                     }
-                    window.location.href = `${server}/logout`;
+                    localStorage.removeItem("unlockTries");
+                    localStorage.removeItem("lastTryTime");
+                    this.auth.logout();
                     return;
                 }
                 this.code$.next("");
                 this.loading = false;
+                localStorage.setItem("unlockTries", this.tries.toString());
+                localStorage.setItem("lastTryTime", Date.now().toString());
                 this.error = true;
-                this.errorMessage = `Remaining attempts: ${this.MAX_TRIES - this.tries}.
-                                     You will be logged out on attempts are over`;
+                this.setErrorMessage();
+            } else {
+                localStorage.removeItem("unlockTries");
+                localStorage.removeItem("lastTryTime");
             }
         });
+    }
+
+    setErrorMessage() {
+        if (this.tries > 0) {
+            this.errorMessage = `Remaining attempts: ${this.MAX_TRIES - this.tries}.
+                                 You will be logged out on attempts are over.`;
+        }
     }
 
 }

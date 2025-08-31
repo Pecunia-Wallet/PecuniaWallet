@@ -11,8 +11,13 @@
     <div class="balances">
         <div class="amount">
             <span class="amount__value">
-                {{ coinBalance }}
+                {{ dp(balance?.available, coin?.decimals ?? 0) }}
             </span>
+            @if (hasUnconfirmed) {
+                <span class="amount__value amount__value--unconfirmed">
+                    +{{ dp(balance?.unconfirmed, coin?.decimals ?? 0) }}&nbsp;{{ coin?.shortName }}&nbsp;pending
+                </span>
+            }
             <span class="amount__currency">
                 {{ coin?.shortName }}
             </span>
@@ -29,19 +34,20 @@
     </div>
     <div class="btn-controls">
         <div class="btn-control btn-control--send" routerLink="/wallet/coin/send" queryParamsHandling="merge">
-            <button>
+            <button pRipple>
                 <fa-icon [icon]="faPaperPlane"/>
             </button>
             <span>Send</span>
         </div>
         <div class="btn-control btn-control--receive" routerLink="/wallet/coin/receive" queryParamsHandling="merge">
-            <button>
+            <button pRipple>
                 <img [ngSrc]="server + '/images/receive.svg'" width="25" height="25">
             </button>
             <span>Receive</span>
         </div>
         <div class="btn-control-wrapper">
             <div class="btn-control btn-control--more"
+                 tabindex="3"
                  (click)="toggleDropdown()"
                  (mouseenter)="showDropdownMenu
                                 ? null
@@ -56,26 +62,43 @@
                         <app-dropdown-menu [active]="showDropdownMenu" [items]="dropdownMenuItems"/>
                     </span>
                 </button>
-                <span>More</span>
+                <span>&nbsp;</span>
             </div>
         </div>
     </div>
+
     <div *ngIf="transactions && transactions.length > 0" class="transactions-title">
         <fa-icon [icon]="faClockRotateLeft"/>
         <span>Transaction History</span>
     </div>
+
     <div class="transactions"
          infinite-scroll [scrollWindow]="false"
          [infiniteScrollDistance]="5"
          (scrolled)="loadNextTransactionsPage(coin!).pipe(take(1)).subscribe()">
-        <span *ngIf="!transactions || transactions.length == 0" class="transactions__none">
+        <span *ngIf="!transactions || transactions.length === 0" class="transactions__none">
             No transactions found 👻
         </span>
         <div class="transaction" *ngFor="let tx of transactions">
-            <div class="transaction__icon"
-                 [class.transaction__icon--send]="tx.amount.isNegative()"
-                 [class.transaction__icon--receive]="tx.amount.isPositive()">
-                <fa-icon [icon]="tx.amount.isPositive() ? faArrowDown : faArrowUp"/>
+            <div [class]="'transaction__icon transaction__icon--' + (!isReliable(tx) ? 'mempool' : tx.type.toLowerCase())">
+                @if (isReliable(tx)) {
+                    @switch (tx.type) {
+                        @case ("SEND") {
+                            <fa-icon [icon]="faArrowUp"/>
+                        }
+                        @case ("RECEIVE") {
+                            <fa-icon [icon]="faArrowDown"/>
+                        }
+                        @case ("MOVE") {
+                            <fa-icon [icon]="faArrowRightArrowLeft"/>
+                        }
+                        @case ("COIN_JOIN") {
+                            <fa-icon [icon]="faShuffle"/>
+                        }
+                    }
+                } @else {
+                    <fa-icon [icon]="faRotate"/>
+                }
             </div>
             <div class="transaction__body">
                 <div class="transaction__info">
@@ -94,8 +117,8 @@
                             </button>
                         </div>
                     </div>
-                    <span class="transaction__timestamp">
-                        {{ tx.time | date: "dd.MM.yyyy, HH:mm" }}
+                    <span class="transaction__timestamp" *ngIf="tx.time && tx.confirmations">
+                        {{ tx.time | date: "dd.MM.yyyy, HH:mm" : _window.getTimeZone() }}
                     </span>
                 </div>
                 <div class="transaction__values">
@@ -107,8 +130,8 @@
                             {{ coin?.shortName }}
                         </span>
                     </div>
-                    <div class="transaction__value transaction__value--fee">
-                        <span>fee:</span>
+                    <div class="transaction__value transaction__value--fee" *ngIf="tx.amount.isNegative()">
+                        <span>incl. fee:</span>
                         <span class="transaction__amount transaction__amount--fee">
                             {{ coin?.decimals ? tx?.fee?.dp(coin!.decimals) : tx.fee.toString() }}
                         </span>

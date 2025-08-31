@@ -5,6 +5,7 @@ export interface Transaction {
     amount: BigNumber,
     fee: BigNumber,
     addresses: string[],
-    time: Date,
-    confirmations: number
+    time?: Date,
+    confirmations: number,
+    type: "SEND" | "RECEIVE" | "MOVE" | "COIN_JOIN"
 }

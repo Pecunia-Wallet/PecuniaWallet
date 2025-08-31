@@ -18,7 +18,7 @@ export interface CipherResponse {
 
 addEventListener("message", async (ev: MessageEvent<CipherSettings>) => {
     const opt = ev.data;
-    let response: CipherResponse = {
+    const response: CipherResponse = {
         message: undefined,
     };
     try {

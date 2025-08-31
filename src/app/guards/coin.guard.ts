@@ -13,19 +13,18 @@ export const coinGuard: CanActivateFn = (route, state) => {
     const currencyService = inject(CurrencyService);
     const router = inject(Router);
 
-    return currencyService.getCoins().pipe(map(coins => {
-        const coin = route.queryParamMap.get("n");
-        if (!coin || !coins.find(c => c.shortName.toLowerCase() == coin.toLowerCase())) {
-            router.navigate([state.url], {
-                queryParams: {
-                    n: coins[0].shortName.toLowerCase()
-                },
-                queryParamsHandling: "merge"
-            });
-            return false;
-        }
-        return true;
-    }));
+    const coins = currencyService.getCoins();
+    const coin = route.queryParamMap.get("n");
+    if (!coin || !currencyService.findCoinByShortName(coin)) {
+        router.navigate([state.url], {
+            queryParams: {
+                n: coins[0].shortName.toLowerCase()
+            },
+            queryParamsHandling: "merge"
+        });
+        return false;
+    }
+    return true;
 };
 
 export const coinlessGuard: CanActivateFn = (route, state) => {

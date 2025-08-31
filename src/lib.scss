@@ -19,7 +19,7 @@ $checkbox: ".checkbox" !default;
     box-shadow .15s ease-in-out;
     width: 100%;
     margin: 0 3px;
-    font-family: "Ubuntu", sans-serif;
+    font-family: "Ubuntu", serif;
 
     &::placeholder {
         color: fade-out($blue-darker, .65);
@@ -105,10 +105,10 @@ $checkbox: ".checkbox" !default;
     &:not(.inactive) {
         &:focus {
             background: #fff;
-            box-shadow: 1px 1px 5px -1px fade-out($blue-darker, .75);
+            box-shadow: 1px 1px 14px fade-out($blue-darker, .93);
 
             &.error {
-                box-shadow: 1px 1px 5px -1px fade-out($red-light, .75);
+                box-shadow: 1px 1px 14px -5px fade-out($red-light, .75);
             }
         }
 
@@ -133,6 +133,12 @@ $checkbox: ".checkbox" !default;
     &.error {
         color: fade-out($red-light, .25);
         border: 1px solid fade-out($red-light, .7);
+
+        & + .stepper {
+            .up, .down {
+                color: $red-light;
+            }
+        }
     }
 
     @media (pointer: coarse), (pointer: none) {
@@ -159,7 +165,7 @@ $checkbox: ".checkbox" !default;
     color .07s ease-in-out;
     border: none;
     cursor: pointer;
-    font-family: "Ubuntu", sans-serif;
+    font-family: "Ubuntu", serif;
     letter-spacing: .05em;
     user-select: none;
     position: relative;
@@ -186,6 +192,7 @@ $checkbox: ".checkbox" !default;
     &.loading {
         color: transparent;
         cursor: progress;
+        pointer-events: none;
 
         .icon {
             opacity: 0;
@@ -233,6 +240,10 @@ $checkbox: ".checkbox" !default;
 
         .icon {
             color: $blue-darker;
+        }
+
+        .loader span {
+            background-color: $blue-darker !important;
         }
     }
 

@@ -13,7 +13,6 @@ export class CipherService {
     constructor() {
         this.worker = new Worker(new URL("../workers/cipher.worker", import.meta.url));
         this.worker.onmessage = msg => this.workerResponse$.next(msg.data as CipherResponse);
-
     }
 
     private exchange(src: string,
@@ -38,7 +37,7 @@ export class CipherService {
             take(1)
         );
         this.worker.postMessage(opt);
-        return observable as unknown as Observable<string>;
+        return observable as any;
     }
 
     encrypt(src: string, key: string, salt?: string) {

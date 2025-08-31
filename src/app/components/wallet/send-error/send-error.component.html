@@ -9,20 +9,20 @@
             It may happen if you try to send too low amount, set too low fee, other.
         </ng-container>
         <ng-container *ngSwitchCase="-400">
-            Insufficient money. Try to lower the fee or enable subtraction from amount.
+            Not enough money. Try to lower the fee or enable subtraction from amount.
         </ng-container>
         <ng-container *ngSwitchDefault>
             The transaction declined by network.
         </ng-container>
     </div>
     <div class="options">
-        <div class="option"><span class="option__name">You can edit transaction:</span>
+        <div class="option">
             <button class="button" (click)="edit()">
                 Edit transaction
                 <fa-icon [icon]="faPenToSquare" />
             </button>
         </div>
-        <div class="option"><span class="option__name">Or return to the main page:</span>
+        <div class="option">
             <button class="button" routerLink="/wallet/coin" queryParamsHandling="merge"
                     [queryParams]="{code: null}">
                 Return to main

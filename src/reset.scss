@@ -2,11 +2,11 @@
 
 * {
     margin: 0;
-    padding: 0;
     box-sizing: border-box;
     outline: none;
     list-style: none;
     -webkit-tap-highlight-color: transparent;
+    font-family: "Ubuntu", serif;
 
     &::-webkit-scrollbar {
         width: 3px;
@@ -35,8 +35,17 @@
     }
 }
 
+*:not(p-accordion, p-accordion-header, p-accordion-content, p-accordion-panel) {
+    padding: 0;
+}
+
 html, body {
     overflow-x: hidden;
+    --p-select-option-selected-focus-color: #fff !important;
+    --p-select-option-selected-color: #fff !important;
+    --p-select-option-selected-focus-background: #2b2e4a !important;
+    --p-select-option-selected-background: #2b2e4a !important;
+    --p-multiselect-option-selected-focus-color: #2b2e4a !important;
 }
 
 html {
@@ -86,11 +95,10 @@ input[type=number]::-webkit-outer-spin-button {
             .text {
                 display: flex;
                 align-items: center;
-                gap: 3px;
                 font-size: 16px;
 
                 img {
-                    margin-left: 4px;
+                    margin: 0 3px 0 10px;
                 }
             }
         }
@@ -107,4 +115,138 @@ input[type=number]::-webkit-outer-spin-button {
         }
 
     }
+}
+
+p-datePicker, p-datepicker, p-date-picker {
+    input {
+        background: #f8f8f9 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 13px 17px !important;
+        max-width: 185px;
+        text-align: center;
+
+        &::placeholder {
+            font-weight: 300;
+            opacity: .5;
+        }
+    }
+
+    &.ng-invalid {
+        input {
+            border: 1px solid fade-out($red-light, .5) !important;
+            margin: -1px !important;
+            color: $red-light !important;
+        }
+
+    }
+}
+
+p-select, p-multi-select, p-multiselect, p-multiSelect {
+    border: none !important;
+    background: #f8f8f9 !important;
+    border-radius: 10px !important;
+    padding: 5px 10px !important;
+
+    .p-placeholder {
+        font-weight: 300;
+        opacity: .5;
+    }
+
+    .p-select-option-selected {
+        background: #2B2E4A !important;
+        color: #fff !important;
+    }
+
+    &.ng-invalid {
+        border: 1px solid fade-out($red-light, .5) !important;
+        margin: -1px !important;
+        padding-right: 8px !important;
+
+        .p-placeholder {
+            color: $red-light;
+        }
+
+        chevrondownicon {
+            color: fade-out($red-light, .5) !important;
+        }
+    }
+}
+
+.p-paginator-page.p-paginator-page-selected {
+    background: $blue-darker !important;
+    color: #fff !important;
+}
+
+p-paginator {
+    &.no-padding {
+        .p-paginator {
+            padding: 0 !important;
+        }
+    }
+
+    p-select {
+        padding: 2px 7px !important;
+    }
+}
+
+.avatar-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 5px;
+
+    .error {
+        font-size: 12px;
+        color: fade-out($red-light, .25);
+    }
+}
+
+.gl--input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+
+    .input-row, app-input {
+        width: 100%;
+    }
+
+    .input-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+
+        span {
+            font-size: 18px;
+            color: fade-out($blue-darker, .3);
+            font-weight: 700;
+        }
+    }
+
+    & > span:not(.error) {
+        position: relative;
+        width: max-content;
+        left: 12px;
+        font-size: 16px;
+        color: fade-out($blue-darker, .25);
+        font-weight: 500;
+    }
+
+    .error {
+        position: relative;
+        left: 12px;
+        font-size: 12px;
+        color: fade-out($red-light, .25);
+    }
+}
+
+p-toggle-switch {
+    --p-toggleswitch-background: #eaeaed !important;
+    --p-toggleswitch-hover-background: #cacbd2 !important;
+}
+
+p-toggle-button{
+    --p-togglebutton-background: #fbfbff;
 }

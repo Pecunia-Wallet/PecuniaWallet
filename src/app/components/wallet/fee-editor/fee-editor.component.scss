@@ -99,11 +99,19 @@
         height: 10px !important;
         margin-left: 4px !important;
         border-radius: 0 !important;
-        background: rgba($blue-darker, .2) !important;
+        background: fade-out($blue-darker, .2) !important;
     }
 
     .ngx-slider .ngx-slider-tick.ngx-slider-selected {
         background: #fff !important;
+    }
+}
+
+.opt {
+    span {
+        font-size: 14px;
+        opacity: .5;
+        margin: 0 3px;
     }
 }
 

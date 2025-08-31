@@ -13,11 +13,13 @@
     width: max-content;
     pointer-events: all;
     z-index: 2;
-    transition: transform .15s ease-in-out;
-    box-shadow: 0 0 15px fade-out($blue-darker, .93);
+    transition: transform .15s ease-in-out, opacity .1s ease-in-out;
+    box-shadow: 0 0 15px fade-out($blue-darker, .85);
+    opacity: 0;
 
     &.active {
         transform: scale(100%);
+        opacity: 1;
         transition: transform .45s $spring-easing;
     }
 

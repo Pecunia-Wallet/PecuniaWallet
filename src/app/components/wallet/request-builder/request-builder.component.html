@@ -1,7 +1,7 @@
 <app-loader [show]="loading"/>
 
 <app-wallet-header title="Compose request" link="/wallet/coin/receive"
-                   [params]="{ addr: null, label: null, message: null, amount: null, restore: null }" />
+                   [params]="{ addr: null, label: null, request: null, amount: null, restore: null }" />
 
 <div class="form">
     <div class="inputs" [formGroup]="form">
@@ -32,7 +32,7 @@
             <span class="hint">* – required fields</span>
         </div>
     </div>
-    <button class="button"
+    <button pRipple class="button" style="--p-ripple-background: rgba(255, 255, 255, .15)"
             [class.inactive]="!valid"
             (click)="compose()">
         Get request

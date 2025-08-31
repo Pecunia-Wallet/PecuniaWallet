@@ -35,10 +35,9 @@ export class IdentityComponent extends CodeComponent {
     constructor(ref: ElementRef,
                 http: HttpClient,
                 sanitizer: DomSanitizer,
-                private auth: AuthService,
-                private title: Title,
+                auth: AuthService,
                 private id: IdentityService) {
-        super(ref, sanitizer, http);
+        super(ref, sanitizer, http, auth);
         this.id.approvalRequested$.subscribe(req => {
             this.show = req;
             if (!req) {

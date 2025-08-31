@@ -18,7 +18,7 @@
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
                         "outputPath": "dist/",
-                        "deployUrl": "/build/",
+                        "deployUrl": "/build/wallet/",
                         "baseHref": "/app/",
                         "index": "src/index.html",
                         "browser": "src/main.ts",
@@ -36,10 +36,19 @@
                         "stylePreprocessorOptions": {
                             "includePaths": [
                                 "src/"
-                            ]
+                            ],
+                            "sass": {
+                                "silenceDeprecations": ["color-functions", "global-builtin"]
+                            }
                         },
-                        "scripts": [],
-                        "webWorkerTsConfig": "tsconfig.worker.json"
+                        "webWorkerTsConfig": "tsconfig.worker.json",
+                        "allowedCommonJsDependencies": [
+                            "hammerjs",
+                            "file-saver",
+                            "device-uuid",
+                            "qr-code-styling",
+                            "multicoin-address-validator"
+                        ]
                     },
                     "configurations": {
                         "production": {
@@ -47,13 +56,13 @@
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "500kb",
-                                    "maximumError": "1.2mb"
+                                    "maximumWarning": "1.5mb",
+                                    "maximumError": "2mb"
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "5kb",
-                                    "maximumError": "12kb"
+                                    "maximumWarning": "100kb",
+                                    "maximumError": "150kb"
                                 }
                             ],
                             "outputHashing": "all",
@@ -126,30 +135,6 @@
                             "src/**/*.html"
                         ]
                     }
-                },
-                "ionic-cordova-serve": {
-                    "builder": "@ionic/angular-toolkit:cordova-serve",
-                    "options": {
-                        "cordovaBuildTarget": "ngwallet:ionic-cordova-build",
-                        "devServerTarget": "ngwallet:serve"
-                    },
-                    "configurations": {
-                        "production": {
-                            "cordovaBuildTarget": "ngwallet:ionic-cordova-build:production",
-                            "devServerTarget": "ngwallet:serve:production"
-                        }
-                    }
-                },
-                "ionic-cordova-build": {
-                    "builder": "@ionic/angular-toolkit:cordova-build",
-                    "options": {
-                        "browserTarget": "ngwallet:build"
-                    },
-                    "configurations": {
-                        "production": {
-                            "browserTarget": "ngwallet:build:production"
-                        }
-                    }
                 }
             }
         }
@@ -157,16 +142,10 @@
     "cli": {
         "analytics": false,
         "schematicCollections": [
-            "@angular-eslint/schematics",
-            "@ionic/angular-toolkit"
-        ]
-    },
-    "schematics": {
-        "@ionic/angular-toolkit:component": {
-            "styleext": "scss"
-        },
-        "@ionic/angular-toolkit:page": {
-            "styleext": "scss"
+            "@angular-eslint/schematics"
+        ],
+        "cache": {
+            "enabled": false
         }
     }
 }

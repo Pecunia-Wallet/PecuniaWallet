@@ -34,6 +34,15 @@
                         "prefix": "app",
                         "style": "kebab-case"
                     }
+                ],
+                "@typescript-eslint/no-explicit-any": "off",
+                "@typescript-eslint/no-unused-vars": [
+                    "warn",
+                    {
+                        "argsIgnorePattern": "^_",
+                        "varsIgnorePattern": "^_",
+                        "caughtErrorsIgnorePattern": "^_"
+                    }
                 ]
             }
         },
@@ -49,12 +58,12 @@
                 "quotes": [
                     "error",
                     "double"
-                ],
+                ]/*,
                 "indent": [
-                    true,
+                    1,
                     "spaces",
                     4
-                ]
+                ]*/
             }
         }
     ]

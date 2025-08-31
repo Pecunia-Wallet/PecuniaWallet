@@ -3,5 +3,10 @@ export interface Coin {
     fullName: string;
     imageUri: string;
     decimals: number;
+    unitName: string;
+    symbol: string;
     color: string;
+    requiredConfirmations: number;
+    explorer: string;
+    defaultAddressType?: string;
 }

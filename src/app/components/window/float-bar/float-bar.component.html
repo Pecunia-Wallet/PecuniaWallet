@@ -1,15 +1,25 @@
 <div class="container" (panup)="toggleTo(true)"
-                       (pandown)="toggleTo(false)">
+     (pandown)="toggleTo(false)">
 
     <div class="links" [style.padding-bottom]="float ?'': '20px'">
         <ng-container *ngFor="let link of links; index as i">
-            <div class="link" [routerLink]="link.uri" queryParamsHandling="preserve"
-                              [class.link--active]="router.url.startsWith(link.uri)">
-                <fa-icon *ngIf="link.image" [icon]="link.image" class="link__image"/>
-                <span class="link__text">{{ link.text }}</span>
-            </div>
+            @if (!link.onClick) {
+                <button class="link" (click)="navigate(link)"
+                     [class.link--active]="router.url.startsWith(link.uri)">
+                    <ng-container *ngTemplateOutlet="inner; context: {link: link}"/>
+                </button>
+            } @else {
+                <button class="link" (click)="link.onClick!()"
+                     [class.link--active]="router.url.startsWith(link.uri)">
+                    <ng-container *ngTemplateOutlet="inner; context: {link: link}"/>
+                </button>
+            }
             <span *ngIf="i+1 < links.length" class="divider"></span>
         </ng-container>
+        <ng-template let-link="link" #inner>
+            <fa-icon *ngIf="link.image" [icon]="link.image" class="link__image"/>
+            <span class="link__text">{{ link.text }}</span>
+        </ng-template>
     </div>
 
     <div class="handle-wrapper" *ngIf="float" (tap)="toggle()">

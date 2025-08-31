@@ -16,6 +16,8 @@ import {WalletHeaderComponent} from "../wallet-header/wallet-header.component";
 import {dp, getCoinName} from "../../../app.config";
 import {BundleService} from "../../../services/bundle.service";
 import {bindAmountChanges} from "../send-step-recipients/send-step-recipients.component";
+import {Ripple} from "primeng/ripple";
+import {AddressBag} from "wallet-sensitive/dist";
 
 @Component({
     selector: "app-request-builder",
@@ -28,7 +30,8 @@ import {bindAmountChanges} from "../send-step-recipients/send-step-recipients.co
         InputComponent,
         FormsModule,
         ReactiveFormsModule,
-        WalletHeaderComponent
+        WalletHeaderComponent,
+        Ripple
     ],
     templateUrl: "./request-builder.component.html",
     styleUrl: "./request-builder.component.scss"
@@ -61,7 +64,8 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
                 private wallet: WalletService,
                 private route: ActivatedRoute,
                 private router: Router,
-                private bundle: BundleService) {}
+                private bundle: BundleService) {
+    }
 
     get uid() {
         return `Wallet/RequestBuilder:${getCoinName(this.route)}`;
@@ -83,7 +87,7 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
                     this.form.get("amountFiat")?.setValue(amount.toString())
                 ));
         }
-        if (!savedInstance || !savedInstance.restore)  return of(void 0);
+        if (!savedInstance || !savedInstance.restore) return of(void 0);
         const amountCoins = savedInstance.amountCoins;
         this.form.get("amountCoins")?.setValue(amountCoins);
         this.form.get("label")?.setValue(savedInstance.label);
@@ -95,14 +99,11 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        forkJoin([
-            this.wallet.currentCoin(this.route).pipe(take(1)),
-            this.currencyService.getAccountCurrency().pipe(take(1))
-        ]).subscribe(([coin, currency]) => {
-            this.coin = coin!;
+        this.currencyService.getAccountCurrency().pipe(take(1)).subscribe(currency => {
+            this.coin = this.wallet.currentCoin(this.route)!;
             this.currency = currency;
 
-            switch (coin!.shortName.toLowerCase()) {
+            switch (this.coin!.shortName.toLowerCase()) {
                 case "btc":
                     this.coinPlaceholder = "0.002 BTC";
                     break;
@@ -120,7 +121,8 @@ export class RequestBuilderComponent implements OnInit, AfterViewInit {
 
             this.address = this.route.snapshot.queryParamMap.get("addr") || undefined;
             let getAddress: Observable<string | undefined> = of(undefined);
-            if (!this.address) getAddress = this.wallet.getAddress(coin!);
+            if (!this.address) getAddress = this.wallet.getAddresses(this.coin!).pipe(map(addr =>
+                addr[this.coin!.defaultAddressType! as keyof AddressBag]));
             forkJoin([
                 getAddress.pipe(take(1)),
                 this.restoreState()

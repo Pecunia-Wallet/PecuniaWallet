@@ -3,7 +3,7 @@
 <app-wallet-header title="Receive funds" />
 
 <div class="content">
-    <div class="qr" (panright)="prev()" (panleft)="next()">
+    <div class="qr" (swiperight)="prev()" (swipeleft)="next()">
         <fa-icon [icon]="faChevronLeft" class="qr__prev"
                  [class.active]="currentAddressIndex > 0" (click)="prev()"/>
         <div class="qr-container" #qrContainer>
@@ -16,29 +16,35 @@
         <div class="address">
             <span class="address__name" [ngSwitch]="currentAddress?.type?.toLowerCase()">
                 <ng-container *ngSwitchCase="'pkh'">
-                    Legacy
+                    Legacy <span class="hint">(P2PKH)</span>
                 </ng-container>
                 <ng-container *ngSwitchCase="'wpkh'">
-                    Segwit <span class="hint">(Bech32)</span>
+                    SegWit <span class="hint">(Native)</span>
+                </ng-container>
+                <ng-container *ngSwitchCase="'sh'">
+                    Legacy <span class="hint">(P2SH)</span>
+                </ng-container>
+                <ng-container *ngSwitchCase="'wsh'">
+                    SegWit <span class="hint">(Nested)</span>
                 </ng-container>
             </span>
             <span class="address__value">{{ currentAddress?.value }}</span>
         </div>
         <div class="controls">
             <div class="controls__left">
-                <button class="control" (click)="copy()">
+                <button pRipple class="control" (click)="copy()">
                     <fa-icon [icon]="faCopy"/>
                 </button>
-                <button class="control" routerLink="/wallet/coin/request/build"
+                <button pRipple class="control" routerLink="/wallet/coin/request/build"
                         queryParamsHandling="merge" [queryParams]="{ addr: currentAddress?.value }">
                     <fa-icon [icon]="faLongArrowAltDown"/>
                 </button>
-                <button class="control" (click)="share()">
+                <button pRipple class="control" (click)="share()">
                     <fa-icon [icon]="faShareNodes"/>
                 </button>
             </div>
             <div class="controls__right">
-                <a class="control" [href]="info" target="_blank">
+                <a pRipple class="control" [href]="info" target="_blank">
                     <fa-icon [icon]="faInfo"/>
                 </a>
             </div>

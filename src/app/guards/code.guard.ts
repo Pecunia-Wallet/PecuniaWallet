@@ -5,8 +5,7 @@ export const codeGuard: CanActivateFn = (route, state) => {
     const router = inject(Router);
 
     const codeParam = parseInt(route.queryParamMap.get("code")!);
-    const codePresents = codeParam != 0 && !codeParam;
-    if (!codePresents) router.navigate(["/"]);
+    if (!codeParam) router.navigate(["/"]);
 
-    return codePresents;
+    return !!codeParam;
 };

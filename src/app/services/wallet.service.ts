@@ -1,22 +1,17 @@
-import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {forwardRef, Inject, Injectable, Injector} from "@angular/core";
+import {HttpBackend, HttpClient} from "@angular/common/http";
 import {server} from "../app.config";
 import {CurrencyService} from "./currency.service";
-import {BehaviorSubject, filter, first, map, Observable, of, take, tap} from "rxjs";
+import {catchError, Observable, of, skip, tap} from "rxjs";
 import BigNumber from "bignumber.js";
-import {FetchService, minutesDifference} from "./fetch.service";
+import {FetchService} from "./fetch.service";
 import {ActivatedRoute} from "@angular/router";
 import {Transaction} from "../models/Transaction";
 import {Coin} from "../models/Coin";
 import {CoinInfo} from "../models/CoinInfo";
 import {AuthService} from "./auth.service";
-
-interface ParametrizedFetch<T> {
-    coin: Coin;
-    subject: BehaviorSubject<T>;
-    lastUpdated: Date;
-    previousValue: BigNumber | null;
-}
+import {AddressBag, Balance, Wallet, WalletExport} from "wallet-sensitive/dist";
+import {CookieService} from "ngx-cookie-service";
 
 export interface FeeEstimate {
     blocks: number;
@@ -28,7 +23,7 @@ export interface TransactionOutputs {
 }
 
 export interface SendResponse {
-    code: 0 | -100 | -125 | -175 | -300 | -400;
+    code: 0 | -100 | -125 | -175 | -300 | -400 | -1 | -2;
     txId?: string;
 }
 
@@ -37,151 +32,99 @@ export interface SendResponse {
 })
 export class WalletService {
 
-    transactionCache = new Map<string, Transaction>();
+    private wallet: Wallet;
+
+    private syncEnabled: boolean;
+
+    private currencyService: CurrencyService;
 
     constructor(private fetcher: FetchService,
                 private http: HttpClient,
-                private currencyService: CurrencyService,
-                private auth: AuthService) {
-        this.auth.auth$.pipe(filter(() => !!auth), first()).subscribe(_ => {
-            this.currencyService.getCoins()
-                .subscribe(coins => {
-                    coins.forEach(coin => setInterval(() => {
-                        this.getBalance(coin, true).subscribe();
-                    }, 1000 * 45));
-                })
-        })
+                private auth: AuthService,
+                private cookie: CookieService,
+                private injector: Injector) {
+        this.wallet = new Wallet(fetcher, http, auth, cookie as any, server);
+        setTimeout(() => {
+            this.currencyService = injector.get(CurrencyService);
+            this.wallet.injectCurrencyService(this.currencyService);
+        }, 10);
+        // if (auth.auth$.value) this.wallet.readApiToken();
+        // auth.auth$.subscribe(auth => {
+        //     if (auth) this.wallet.readApiToken();
+        // });
     }
 
-    private balances: Array<ParametrizedFetch<BigNumber>> = [];
-    private transactions: Array<ParametrizedFetch<Transaction>> = [];
-    private coinInfos: Array<ParametrizedFetch<CoinInfo>> = [];
-
-    private getWrapper(coin: Coin, target: ParametrizedFetch<any>[]) {
-        let wrapper = target.find(f => f.coin == coin);
-        if (!wrapper) target.push(wrapper = {
-            coin: coin,
-            subject: new BehaviorSubject<BigNumber>(new BigNumber("")),
-            lastUpdated: new Date(0),
-            previousValue: null
-        });
-        return wrapper;
+    enableSync() {
+        if (this.syncEnabled) return;
+        this.currencyService.getCoins().forEach(coin => setInterval(() => {
+            this.getBalance(coin, true).subscribe();
+        }, 1000 * 30));
+        this.syncEnabled = true;
     }
 
-    getCoinInfo(coin: Coin): Observable<CoinInfo> {
-        const wrapper = this.getWrapper(coin, this.coinInfos);
-        return this.fetcher.fetch({
-            subject: wrapper.subject,
-            parse: (coinInfo: CoinInfo | string) => coinInfo as CoinInfo,
-            renew: {
-                url: `${server}/wallet/${coin.shortName}/info`,
-                sendCredentials: true
-            }
-        });
+    getApiToken(): Observable<string> {
+        return this.wallet.getApiToken();
     }
 
-    getAddress(coin: Coin, type?: string): Observable<string> {
-        return this.http.get(`${server}/wallet/${coin.shortName}/addr`, {
-            withCredentials: true,
-            responseType: "text",
-            params: {
-                type: type || "default"
-            }
-        });
+    getCoinInfo(coin: Coin): CoinInfo {
+        return this.wallet.getCoinInfo(coin);
     }
 
-    getBalance(coin: Coin, force?: boolean): Observable<BigNumber> {
-        const wrapper = this.getWrapper(coin, this.balances);
-        return this.fetcher.fetch({
-            subject: wrapper.subject,
-            when: () => force || minutesDifference(wrapper.lastUpdated, new Date()) > 2,
-            parse: (balance: string) => {
-                wrapper.lastUpdated = new Date();
-                wrapper.previousValue = wrapper.subject.value;
-                return new BigNumber(balance);
-            },
-            renew: {
-                url: `${server}/wallet/${coin.shortName}/balance`,
-                sendCredentials: true
-            }
-        });
+    getAddresses(coin: Coin): Observable<AddressBag> {
+        return this.wallet.getAddresses(coin);
     }
 
-    onBalanceChange(coin: Coin): Observable<BigNumber> {
-        const wrapper = this.getWrapper(coin, this.balances);
-        return wrapper.subject.pipe(filter((value: BigNumber) =>
-            !value.isEqualTo(wrapper.previousValue || new BigNumber("-1"))
-        ));
+    export(coin: Coin): Observable<WalletExport> {
+        return this.wallet.export(coin);
     }
 
-    private convertObjToTx(tx: Transaction): Transaction {
-        if (!tx) return null as any;
-        tx.amount = new BigNumber(tx.amount);
-        tx.fee = new BigNumber(tx.fee);
-        tx.time = new Date(tx.time);
-        return tx;
+    getBalance(coin: Coin, force?: boolean): Observable<Balance> {
+        return this.wallet.getBalance(coin, force);
+    }
+
+    onBalanceChange(coin: Coin): Observable<Balance> {
+        return this.wallet.onBalanceChange(coin).pipe(skip(1), tap(() => {
+            this.wallet.clearTransactionCache(coin)
+        }));
     }
 
     getTransactions(coin: Coin,
                     page?: { size: number, offset: number },
                     orderBy: "AMOUNT" | "TIME" | "TYPE" = "TIME",
                     orderDir: "ASC" | "DESC" = "DESC"): Observable<[number, Array<Transaction>]> {
-        const wrapper = this.getWrapper(coin, this.transactions);
-        return this.http.get<Array<Transaction>>(`${server}/wallet/${coin.shortName}/txs`, {
-            withCredentials: true,
-            params: {
-                orderBy: orderBy,
-                orderDir: orderDir,
-                pageSize: page?.size || -1,
-                pageOffset: page?.offset || 0,
-            },
-            observe: "response"
-        }).pipe(map(response => {
-            const itemsRemaining = Number.parseInt(
-                response.headers.get("X-Items-Remaining") || "0");
-            const transactions = response.body?.map(this.convertObjToTx) || [];
-            wrapper.lastUpdated = new Date();
-            return [itemsRemaining, transactions];
-        }));
+        return this.wallet.getTransactions(coin, page, orderBy, orderDir);
     }
 
     getTransaction(coin: Coin, id: string): Observable<Transaction> {
-        if (this.transactionCache.has(id)) return of(this.transactionCache.get(id)!!);
-        return this.http.get<Transaction>(`${server}/wallet/${coin.shortName}/tx/${id}`, {
-            withCredentials: true
-        }).pipe(map(this.convertObjToTx), tap(tx =>
-            this.transactionCache.set(id, tx)
-        ));
+        return this.wallet.getTransaction(coin, id);
     }
 
-    importKeys(coin: Coin, keys: string[]): Observable<boolean> {
-        return this.http.post(`${server}/wallet/${coin.shortName}/import`, keys, {
-            withCredentials: true,
-            responseType: "text"
-        }).pipe(map(response => response.toLowerCase() == "true"));
+    verifyKeys(coin: Coin, keys: string[]): Observable<boolean> {
+        return this.wallet.verifyKeys(coin, keys);
+    }
+
+    importKeys(coin: Coin, fee: BigNumber, keys: string[]): Observable<SendResponse> {
+        return this.wallet.importKeys(coin, fee, keys).pipe(tap(() => this.wallet.clearTransactionCache(coin)));
     }
 
     currentCoin(route: ActivatedRoute) {
-        const n = route.snapshot.queryParamMap.get("n");
-        return this.currencyService.getCoins().pipe(map(coins => {
-            const coin = coins.find(coin => coin.shortName.toLowerCase() == n?.toLowerCase());
-            if (!coin) return undefined;
-            return coin;
-        }));
+        return this.wallet.currentCoin(route);
     }
 
     getFeeEstimates(coin: Coin): Observable<Array<FeeEstimate>> {
-        return this.http.get(`${server}/wallet/${coin.shortName}/fees`, {
-            withCredentials: true
-        }).pipe(map((estimates: any) => {
-            let res = [];
-            for (const [block, rate] of Object.entries(estimates)) {
-                res.push({
-                    blocks: parseInt(block),
-                    feeRate: new BigNumber(rate as string)
-                });
-            }
-            return res;
+        return this.wallet.getFeeEstimates(coin);
+    }
+
+    grantKeys(): Observable<boolean> {
+        return this.wallet.grantKeys();
+    }
+
+    revokeKeys() {
+        return this.http.delete(`${server}/account/keys`, {
+            withCredentials: true,
+            responseType: "text"
+        }).pipe(catchError(e => {
+            return of(null);
         }));
     }
 
@@ -189,17 +132,7 @@ export class WalletService {
          outputs: TransactionOutputs,
          fee?: BigNumber,
          recipientsPayFees?: boolean): Observable<SendResponse> {
-        const transactionRequest: any = {
-            outputs: outputs
-        };
-        if (fee) {
-            transactionRequest.fee = fee.toString();
-            transactionRequest.recipientsPayFees = !!recipientsPayFees;
-        }
-        return this.http.post<SendResponse>(
-            `${server}/wallet/${coin.shortName}/tx`,
-            transactionRequest, {
-                withCredentials: true
-            }).pipe(tap(() => this.getBalance(coin, true)));
+        return this.wallet.send(coin, outputs, fee, recipientsPayFees)
+            .pipe(tap(() => this.wallet.clearTransactionCache(coin)));
     }
 }

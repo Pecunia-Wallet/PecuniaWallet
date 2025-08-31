@@ -2,8 +2,11 @@
 
 <app-wallet-header title="Send funds"/>
 <div class="content">
-    <div class="recipients" (swiperight)="prev()" (swipeleft)="next()" #recipientsElem>
-        <span class="recipients__label" *ngIf="currentRecipient">Recipient #{{ currentIndex + 1 }}</span>
+    <div class="recipients" (swiperight)="_window.isMobile() ? prev() : null"
+         (swipeleft)="_window.isMobile() ? next() : null" #recipientsElem>
+        <span class="recipients__label" *ngIf="currentRecipient">
+            Recipient #{{ currentIndex + 1 }}
+        </span>
         <div class="recipients__controls">
             <div class="recipients__prev" (click)="prev()"
                  [class.inactive]="currentIndex <= 0">
@@ -91,7 +94,7 @@
         </div>
         <div class="info__row error error--money" *ngIf="insufficientMoney | async">
             <fa-icon [icon]="faCircleExclamation" />
-            Insufficient money
+            Not enough money
         </div>
     </div>
     <div class="controls">

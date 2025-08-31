@@ -1,1 +1,51 @@
-<p>office works!</p>
+<div class="header" #header>
+    <ng-container *ngTemplateOutlet="logo" />
+    @if (!_window.isMobile()) {
+        <ng-container *ngTemplateOutlet="nav" />
+        <button class="lock" (click)="lock()">
+            <img [ngSrc]="server + '/images/lock.svg'" width="20" height="22">
+        </button>
+    } @else {
+        <button class="menu-button" (click)="showMenu = true"><fa-icon [icon]="faBars" /></button>
+    }
+</div>
+<div class="content" [style.height]="'calc(100% - ' + header.offsetHeight + 'px)'">
+    <router-outlet/>
+</div>
+
+<div class="menu" *ngIf="_window.isMobile()" [class.visible]="showMenu">
+    <div class="menu__header">
+        <ng-container *ngTemplateOutlet="logo" />
+        <button (click)="showMenu = false"><fa-icon [icon]="faXmark" /></button>
+    </div>
+    <ng-container *ngTemplateOutlet="nav" />
+</div>
+
+<ng-template #logo>
+    <div class="logo">
+        <img [ngSrc]="server + '/images/favicon.png'" width="25" height="25">
+        <span *ngIf="_window.isMobile()">Pecunia Office</span>
+    </div>
+</ng-template>
+
+<ng-template #nav>
+    <nav class="nav">
+            <a class="nav__link" *ngFor="let link of links"
+                  [routerLinkActive]="['nav__link--active']"
+                  [routerLink]="'/office/' + link.href"
+                  (click)="showMenu = false"
+                  queryParamsHandling="merge">
+                <fa-icon [icon]="link.icon" />
+                <span class="text">{{ link.name }}</span>
+            </a>
+        <button class="nav__link nav__link--separated"
+              (click)="_window.toWallet(); showMenu = false">
+            <fa-icon [icon]="faWallet" />
+            <span class="text">Wallet</span>
+        </button>
+        <button class="nav__link nav__link--lock" (click)="lock(); showMenu = false" *ngIf="_window.isMobile()">
+            <img [ngSrc]="server + '/images/lock.svg'" width="20" height="22">
+            <span class="text">Lock</span>
+        </button>
+    </nav>
+</ng-template>

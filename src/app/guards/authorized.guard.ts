@@ -19,15 +19,17 @@ function parseUrl(queryString: string): { url: string, params: { [key: string]: 
 }
 
 export const authorizedGuard: CanActivateFn = (_, state) => {
-    const auth = inject(AuthService);
+    const authority = inject(AuthService);
     const router = inject(Router);
 
     const route = parseUrl(state.url);
-    auth.navigateAfterAuth(route.url, route.params);
-    return auth.isAuthorized().pipe(map(auth => {
-        if (!auth) router.navigate(["unlock"], {
-            queryParamsHandling: "preserve"
-        });
+    return authority.isAuthorized().pipe(map(auth => {
+        if (!auth) {
+            authority.navigateAfterAuth(route.url, route.params);
+            router.navigate(["unlock"], {
+                queryParamsHandling: "preserve"
+            });
+        }
         return auth;
     }));
 };

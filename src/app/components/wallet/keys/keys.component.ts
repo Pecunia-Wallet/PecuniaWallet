@@ -13,8 +13,7 @@ import {WalletHeaderComponent} from "../wallet-header/wallet-header.component";
 import {BundleService} from "../../../services/bundle.service";
 import {BrokerService} from "../../../services/broker.service";
 import {getCoinName} from "../../../app.config";
-import {ModalComponent} from "../../modal/modal.component";
-import {Animation} from "chart.js";
+import {Dialog} from "primeng/dialog";
 
 interface Input {
     form: FormControl,
@@ -36,11 +35,6 @@ const MAX_KEY_COUNT = 10;
     standalone: true,
     imports: [
         FaIconComponent,
-        RouterLink,
-        LoaderComponent,
-        NgSwitch,
-        NgSwitchCase,
-        NgSwitchDefault,
         NgForOf,
         FormsModule,
         ReactiveFormsModule,
@@ -48,17 +42,12 @@ const MAX_KEY_COUNT = 10;
         ApplyDirective,
         InputComponent,
         WalletHeaderComponent,
-        TitleCasePipe,
-        ModalComponent
+        Dialog
     ],
     templateUrl: "./keys.component.html",
     styleUrl: "./keys.component.scss"
 })
 export class KeysComponent implements OnInit {
-
-    @ViewChild("importButton") importButton: ElementRef;
-    @ViewChild("attachButton") attachButton: ElementRef;
-    @ViewChild("buttons") buttonContainer: ElementRef;
 
     loading = false;
     error = false;
@@ -91,7 +80,7 @@ export class KeysComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.wallet.currentCoin(this.route).subscribe(coin => this.coin = coin!);
+        this.coin = this.wallet.currentCoin(this.route)!;
     }
 
     setInputElement(input: Input, element: InputComponent) {
@@ -141,91 +130,9 @@ export class KeysComponent implements OnInit {
         }
     }
 
-    swapButtons(top: HTMLElement, bottom: HTMLElement): SwapConf {
-        const topWidth = top.offsetWidth;
-        const bottomWidth = bottom.offsetWidth;
-        const containerWidth = this.buttonContainer.nativeElement.offsetWidth;
-        const animations: globalThis.Animation[] = [];
-
-        this.buttonContainer.nativeElement.style.width = `${containerWidth}px`;
-
-        if (this.buttonContainer.nativeElement.children[0] === top) {
-            bottom.style.position = "absolute";
-        } else {
-            top.style.position = "absolute";
-        }
-
-        bottom.animate([
-            {width: bottomWidth + "px"},
-            {width: "70px"}
-        ], {
-            duration: 170, fill: "forwards"
-        }).onfinish = () => {
-            const animation = bottom.animate([
-                {opacity: bottom.style.opacity},
-                {opacity: 0}
-            ], {
-                duration: 50, fill: "forwards"
-            });
-            animations.push(animation);
-            animation.commitStyles();
-        }
-
-        top.animate([
-            {width: topWidth + "px"},
-            {width: containerWidth + "px"}
-        ], {
-            duration: 400, easing: "ease-out", fill: "forwards"
-        });
-
-        return {
-            top: top,
-            bottom: bottom,
-            topWidth: topWidth,
-            bottomWidth: bottomWidth,
-            animations: animations
-        };
-    }
-
-    restoreButtons(swapConf: SwapConf) {
-        swapConf.top.animate([
-            {width: swapConf.top.offsetWidth + "px"},
-            {width: swapConf.topWidth + "px"}
-        ], {
-            duration: 500, fill: "forwards", easing: "ease-in-out"
-        });
-
-        swapConf.bottom.animate([
-            {width: swapConf.bottom.offsetWidth + "px"},
-            {width: swapConf.bottomWidth + "px"}
-        ], {
-            duration: 400, fill: "forwards", easing: "ease-in"
-        });
-
-        const animation = swapConf.bottom.animate([
-            {opacity: 0},
-            {opacity: this.valid ? 1 : .5}
-        ], {
-            duration: 400, fill: "forwards", easing: "ease-in"
-        });
-        animation.commitStyles();
-        animation.onfinish = () => {
-            swapConf.bottom.animate([
-                {opacity: swapConf.bottom.style.opacity},
-                {opacity: ""}
-            ], {
-                fill: "forwards", duration: 0
-            }).commitStyles();
-            animation.cancel();
-        };
-
-        swapConf.animations.forEach(a => a.cancel());
-    }
-
     import() {
         if (!this.valid || this.loading) return;
         this.loading = true;
-        const swc = this.swapButtons(this.importButton.nativeElement, this.attachButton.nativeElement);
         const keys = this.keys
             .map(input => input.form.value)
             .filter(key => key.length >= 10);
@@ -237,7 +144,7 @@ export class KeysComponent implements OnInit {
                         this.changes = false;
                         this.error = true;
                         this.loading = false;
-                        this.restoreButtons(swc);
+                        // this.restoreButtons(swc);
                     }, 1000);
                 } else {
                     this.broker.data.import = {
@@ -246,29 +153,6 @@ export class KeysComponent implements OnInit {
                     setTimeout(() => this.router.navigate(["/wallet/coin/import/fee"], {
                         queryParamsHandling: "merge"
                     }), 300);
-                }
-            })
-    }
-
-    attach() {
-        if (!this.valid || this.loading) return;
-        this.loading = true;
-        const swc = this.swapButtons(this.attachButton.nativeElement, this.importButton.nativeElement);
-        this.wallet
-            .attachKeys(this.coin, this.keys
-                .map(input => input.form.value)
-                .filter(key => key.length >= 10))
-            .subscribe(result => {
-                if (!result) {
-                    setTimeout(() => {
-                        this.changes = false;
-                        this.error = true;
-                        this.loading = false;
-                        this.restoreButtons(swc);
-                    }, 1000);
-                } else {
-                    setTimeout(() => this.router.navigate(["/"]), 5000);
-                    setTimeout(() => this.wallet.getBalance(this.coin, true), 7000);
                 }
             })
     }
